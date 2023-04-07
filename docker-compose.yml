@@ -1,0 +1,46 @@
+version: "3.8"
+
+services:
+  web:
+    build: .          # 设置上下文，会查找当前目录下的 Dockerfile 文件，基于文件描述构建  
+    env_file:
+      - .env          # 加载配置文件
+    ports:
+      - ${HTTP_SERVER_PORT}:4000     # web 服务端口映射
+    volumes:          
+      - .:/usr/src/app   # 数据卷，当前目录:容器目录
+    networks:      
+      - default  # 使用默认网络，bridge 模式，容器之间可以访问
+    depends_on:   # 容器启动先后次序，这里先启动 mysql，但并一定是mysq启动完成后再启动web
+      - mysqldb
+
+    # 环境变量，这是设置web服务的环境变量，当执行 go run main.go 时，
+    # 这些环境变量是加载到程序的，可以通过 os.Getenv(key) 获取。
+    # 建议一些固定的配置可以直接写这里，经常要修改的还是放在配置文件里，如这里的 .env 文件
+    # 当然，统一在配置文件来设置也很灵活，查找变量时，就不同看两个地方了。这就仁者见仁...
+    environment:  
+      - HTTP_SERVER_PORT=${HTTP_SERVER_PORT}
+      - VIEW_PATH=/views
+      - PUBLIC_PATH=/public
+      - DB_SOURCE=root:${DB_PASSWORD}@tcp(mysqldb:3306)/shortnet?charset=utf8mb4&parseTime=True&loc=Local
+
+    # command: go run cmd/main.go -b 0.0.0.0
+    command: air cmd/main.go -b 0.0.0.0     # 使用 air 启动程序，监听文件变化，热重载
+
+  mysqldb:
+    image: "mysql:5.7.22"
+    ports:
+      # mysql端口映射，属主机使用这个mysql服务，用DB_PORT端口；而容器之间使用则用 3306
+      - "${DB_PORT}:3306"  
+    restart: always  # 总是启动，当docker启动时，就会启动这个服务
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - ${DB_STORAGE}:/var/lib/mysql
+    networks:
+      - default
+
+networks:
+  default:
