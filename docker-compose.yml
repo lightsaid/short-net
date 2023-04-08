@@ -23,6 +23,9 @@ services:
       - VIEW_PATH=/views
       - PUBLIC_PATH=/public
       - DB_SOURCE=root:${DB_PASSWORD}@tcp(mysqldb:3306)/shortnet?charset=utf8mb4&parseTime=True&loc=Local
+      - RUN_MODE=${RUN_MODE}
+      - MYSQL_LOG=${MYSQL_LOG}
+      - ACCESS_LOG=${ACCESS_LOG}
 
     # command: go run cmd/main.go -b 0.0.0.0
     command: air cmd/main.go -b 0.0.0.0     # 使用 air 启动程序，监听文件变化，热重载

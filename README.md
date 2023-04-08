@@ -300,3 +300,50 @@ build:
 - Port 是mysqldb服务本地的端口 3306 而不是映射的 3307 
 
 为什么不建议使用 Host + Port 访问，是应为重启服务时 IP 会变变化的。（除非，配置固定IP）
+
+
+## 数据库设计和功能
+
+为了简单，仅设计一些核心的表, 不会设计商业分析的表
+
+### 数据库设计
+
+数据库分为两个表
+
+users table
+- id
+- name
+- email
+- password
+- avatar
+- role (USER、ADMIN)
+- created_at
+- updated_at
+- deleted_at
+
+links table
+- id 
+- user_id
+- long_url
+- short_hash  
+- click      (别点击次数)
+- created_at
+- updated_at
+- expired_at (过期时间)
+
+
+### 基于上面两个表要实现什么功能呢？
+- 注册
+- 登录
+- 更新用户信息
+- 创建短网址
+- 修改短网址
+- 重定向短网址
+- 短网址列表
+- 短网址删除
+- 定时检查短网址，过期超过多长时间即可删除
+
+看着好像没什么功能，如果将每一项功能细化划分，其实代码多着呢。
+
+
+
