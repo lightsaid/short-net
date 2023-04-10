@@ -1,0 +1,73 @@
+:root {
+    box-sizing: border-box;
+    --theme-color: #2F9BD9;
+}
+
+*,
+::before,
+::after {
+    box-sizing: inherit;
+    padding: 0;
+    margin: 0;
+}
+
+html {
+    height: 100%;
+}
+
+body {
+    height: 100%;
+    margin: 0;
+    font-family: 'Noto Sans SC', 'iconfont', Helvetica, Arial, sans-serif;
+    background: rgb(109, 170, 218, .5);
+    background: linear-gradient(280deg, #7eade3 0%, rgb(214, 164, 188) 40%, #2F9BD9 70%, #3da0da 100%);
+}
+
+ul,
+li {
+    list-style: none;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.flex {
+    display: flex;
+}
+
+.items-center {
+    align-items: center;
+}
+
+
+/* font */
+/* noto-sans-sc-regular - latin */
+@font-face {
+    font-family: 'Noto Sans SC';
+    font-style: normal;
+    font-weight: 400;
+    src: local(''),
+        /* Chrome 26+, Opera 23+, Firefox 39+ */
+        url('../fonts/noto-sans-sc-v26-latin/noto-sans-sc-v26-latin-regular.woff2') format('woff2'),
+        /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
+        url('../fonts/noto-sans-sc-v26-latin/noto-sans-sc-v26-latin-regular.woff') format('woff');
+}
+
+/* noto-sans-sc-500 - latin */
+@font-face {
+    font-family: 'Noto Sans SC';
+    font-style: normal;
+    font-weight: 500;
+    src: local(''),
+        /* Chrome 26+, Opera 23+, Firefox 39+ */
+        url('../fonts/noto-sans-sc-v26-latin/noto-sans-sc-v26-latin-500.woff2') format('woff2'),
+        /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
+        url('../fonts/noto-sans-sc-v26-latin/noto-sans-sc-v26-latin-500.woff') format('woff');
+}
