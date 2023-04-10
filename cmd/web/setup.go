@@ -1,11 +1,14 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"os"
 	"time"
 
+	"github.com/lightsaid/short-net/models"
+	"github.com/lightsaid/short-net/util"
 	"github.com/natefinch/lumberjack"
 	"golang.org/x/exp/slog"
 	"gorm.io/driver/mysql"
@@ -13,10 +16,23 @@ import (
 	"gorm.io/gorm/logger"
 )
 
+var initShortID uint = 10000
+
 func fatalOnError(err error, msg string) {
 	if err != nil {
 		log.Fatalf("msg: %s", err.Error())
 	}
+}
+
+func setupConfig() envConfig {
+	var envConf envConfig
+	env, err := util.Loadingenv(".env")
+	fatalOnError(err, "Loadingenv failed")
+
+	err = util.Setingenv(&envConf, env)
+	fatalOnError(err, "Setingenv failed")
+
+	return envConf
 }
 
 func setupLogger() {
@@ -32,6 +48,18 @@ func setupLogger() {
 		MaxAge:     28,   //days
 		Compress:   true, // disabled by default
 	})))
+}
+
+// setupShortID 从数据库里link表获取最后一记录的hash，转为uint id，系统后续生成hash，基于此id递增
+func setupShortID(db *gorm.DB) uint {
+	var link models.Link
+	err := db.Last(&link).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return initShortID
+	}
+	fatalOnError(err, "init shortID server error")
+
+	return util.DecodeBase62(link.ShortHash)
 }
 
 func setupDB() *gorm.DB {
