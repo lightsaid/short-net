@@ -1,11 +1,19 @@
 package main
 
-// func setupRoute() *http.ServeMux {
-// 	mux := http.NewServeMux()
+import (
+	"github.com/lightsaid/gotk/mux"
+)
 
-// 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-// 		fmt.Fprintf(w, "Hello!")
-// 	})
+func (app *application) setupRoute() *mux.ServeMux {
+	r := mux.NewServeMux()
 
-// 	return mux
-// }
+	r.GET("/", app.indexHandler)
+
+	r.GET("/sign", app.signHandler)
+
+	r.GET("/signin", app.signinHandler)
+
+	r.GET("/signup", app.signupHandler)
+
+	return r
+}
