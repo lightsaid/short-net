@@ -6,6 +6,7 @@ import (
 	"regexp"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 )
@@ -29,7 +30,7 @@ func TestXxx(t *testing.T) {
 }
 
 func readEnv(t *testing.T) map[string]string {
-	var path = "../.env"
+	var path = "./test.env"
 	env, err := Loadingenv(path)
 	require.NoError(t, err)
 	for k, v := range env {
@@ -46,9 +47,20 @@ func TestLoadingenv(t *testing.T) {
 
 func TestSetingenv(t *testing.T) {
 	type config struct {
-		DBPort     string `mapstruct:"DB_PORT"`
-		DBName     string `mapstruct:"DB_NAME"`
-		DBPassword string `mapstruct:"DB_PASSWORD"`
+		DBPort int           `mapstruct:"DB_PORT"`
+		DBName string        `mapstruct:"DB_NAME"`
+		IsDev  bool          `mapstruct:"IS_DEV"`
+		Pi     float32       `mapstruct:"PI"`
+		Day    time.Duration `mapstruct:"Day"`
+		Hour   time.Duration `mapstruct:"Hour"`
+		Minute time.Duration `mapstruct:"Minute"`
+		Second time.Duration `mapstruct:"Second"`
+		/*
+			Day=3d
+			Hour=10h
+			Minute=15m
+			Second=30s
+		*/
 	}
 	env := readEnv(t)
 
@@ -56,9 +68,12 @@ func TestSetingenv(t *testing.T) {
 	err := Setingenv(&target, env)
 	require.NoError(t, err)
 
-	// fmt.Printf(">>> %v\n", target)
-
-	require.Equal(t, target.DBPort, "3307")
+	require.Equal(t, target.DBPort, 3307)
 	require.Equal(t, target.DBName, "shortnet")
-	require.Equal(t, target.DBPassword, "abc123")
+	require.Equal(t, target.IsDev, true)
+	require.Equal(t, target.Pi, float32(3.14))
+	require.Equal(t, target.Day, 3*24*time.Hour)
+	require.Equal(t, target.Hour, 10*time.Hour)
+	require.Equal(t, target.Minute, 15*time.Minute)
+	require.Equal(t, target.Second, 30*time.Second)
 }
