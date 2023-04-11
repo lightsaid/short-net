@@ -36,18 +36,23 @@ func setupConfig() envConfig {
 }
 
 func setupLogger() {
-	var logfile = os.Getenv("ACCESS_LOG")
-	if logfile == "" {
-		logfile = "./storage/log/access.log"
+	if os.Getenv("RUN_MODE") == "prod" {
+		var logfile = os.Getenv("ACCESS_LOG")
+		if logfile == "" {
+			logfile = "./storage/log/access.log"
+		}
+		// 日志分割
+		slog.SetDefault(slog.New(slog.NewJSONHandler(&lumberjack.Logger{
+			Filename:   logfile,
+			MaxSize:    1, // megabytes
+			MaxBackups: 3,
+			MaxAge:     28,   //days
+			Compress:   true, // disabled by default
+		})))
+	} else {
+		// 标准输出
+		slog.SetDefault(slog.New(slog.NewTextHandler(os.Stdout)))
 	}
-
-	slog.SetDefault(slog.New(slog.NewJSONHandler(&lumberjack.Logger{
-		Filename:   logfile,
-		MaxSize:    1, // megabytes
-		MaxBackups: 3,
-		MaxAge:     28,   //days
-		Compress:   true, // disabled by default
-	})))
 }
 
 // setupShortID 从数据库里link表获取最后一记录的hash，转为uint id，系统后续生成hash，基于此id递增

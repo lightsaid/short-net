@@ -3,6 +3,7 @@ module github.com/lightsaid/short-net
 go 1.19
 
 require (
+	github.com/lightsaid/gotk v0.1.0
 	github.com/natefinch/lumberjack v2.0.0+incompatible
 	github.com/stretchr/testify v1.8.2
 	golang.org/x/crypto v0.8.0
@@ -17,7 +18,6 @@ require (
 	github.com/go-sql-driver/mysql v1.7.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
-	github.com/lightsaid/gotk v0.0.0-20230409143449-3a7266ac2fdb // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect

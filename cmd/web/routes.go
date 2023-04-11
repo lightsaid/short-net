@@ -7,13 +7,22 @@ import (
 func (app *application) setupRoute() *mux.ServeMux {
 	r := mux.NewServeMux()
 
-	r.GET("/", app.indexHandler)
+	app.showpages(r)
 
-	r.GET("/sign", app.signHandler)
+	r.POST("/login", app.loginHandler)
+	r.POST("/resister", app.registerHandler)
 
-	r.GET("/signin", app.signinHandler)
-
-	r.GET("/signup", app.signupHandler)
+	// 静态资源
+	r.Static("/static/", "./static")
 
 	return r
+}
+
+func (app *application) showpages(r *mux.ServeMux) {
+	r.GET("/", app.indexHandler)
+	r.GET("/sign", app.signHandler)
+	r.GET("/forgot", app.forgotHandler)
+	r.GET("/reset", app.resetHandler)
+	r.GET("/notfound", app.notFoundHandler)
+	r.GET("/servererror", app.serverErrorHandler)
 }
