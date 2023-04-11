@@ -1,0 +1,19 @@
+.errorpage{
+    width: 500px;
+    min-height: 300px;
+    margin: 130px auto;
+    border-radius: 12px;
+    background-color: #fff;
+    flex-direction: column;
+}
+
+.message{
+    width: 400px;
+    height: 240px;
+    margin: 0 auto;
+    object-fit: cover;
+}
+
+.gohome{
+    margin-top: 18px; font-weight: bold; color: var(--theme-color);
+}

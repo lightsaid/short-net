@@ -11,22 +11,36 @@ import (
 
 func (app *application) genTemplateCache() error {
 	slog.Info("templates base path", "path", app.env.ViewPath+"/*.page.html")
-	matches, err := filepath.Glob(fmt.Sprintf("%s/*.page.html", app.env.ViewPath))
+	pages, err := filepath.Glob(fmt.Sprintf("%s/*.page.html", app.env.ViewPath))
 	if err != nil {
 		slog.Error("match")
 		return err
 	}
-	slog.Info("matches views", "views", matches)
-	for _, match := range matches {
-		t, err := template.ParseFiles(match)
+	slog.Info("matches views", "views", pages)
+	for _, pages := range pages {
+		// 解析模版
+		t, err := template.ParseFiles(pages)
 		if err != nil {
-			slog.Error("template.ParseFiles: "+err.Error(), "match", match)
-			continue
+			slog.Error("template.ParseFiles: "+err.Error(), "pages", pages)
+			return err
 		}
 
-		filename := filepath.Base(match)
+		// 加载布局组件 *.layout.html
+		t, err = t.ParseGlob(fmt.Sprintf("%s/*.layout.html", app.env.ViewPath))
+		if err != nil {
+			return err
+		}
+
+		// 加载其他组件 *.partial.html
+		t, err = t.ParseGlob(fmt.Sprintf("%s/*.partial.html", app.env.ViewPath))
+		if err != nil {
+			return err
+		}
+
+		// 根据文件名缓存，如 index.page.html
+		filename := filepath.Base(pages)
 		if app.templateCache == nil {
-			app.templateCache = make(map[string]*template.Template, len(matches))
+			app.templateCache = make(map[string]*template.Template, len(pages))
 		}
 		app.templateCache[filename] = t
 	}

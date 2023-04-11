@@ -1,57 +1,16 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
+{{template "default" .}}
 
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Short Net</title>
-    <link rel="stylesheet" href="../static/styles/app.css">
-    <link rel="stylesheet" href="../static/styles/index.css">
-    <link rel="stylesheet" href="../static/fonts/iconfont/iconfont.css">
-</head>
+{{define "css"}}
+<link rel="stylesheet" href="/static//styles/error.css">
+{{end}}
 
-<body>
-    <div class="container">
-        <header class="header">
-            <div class="logo">
-                <a href="#">
-                    <img src="../static/images/logo.png" alt="logo">
-                </a>
-            </div>
-            <div class="navbar">
-                <!-- <ul class="flex items-center sign-btns">
-                    <li>
-                        <a href="#" class="flex items-center">
-                            <i class="iconfont icon-dengluyonghuming" style="font-size: 19px;"></i>
-                            <span class="flex items-center">&nbsp;Register<i style="font-weight: bold; font-size: 12px;">&nbsp;/&nbsp;</i>Login</span>
-                        </a>
-                    </li>
-                </ul> -->
-                <ul class="flex items-center">
-                    <li><a href="#">MyURLs</a></li>
-                    <li>
-                        <div class="userinfo flex items-center">
-                            <div class="avatar">
-                                <a href="#">
-                                    <img src="../static/images/avatar1.png" alt="avatar">
-                                </a>
-                            </div>
-                            <a href="#">Lightsaid</a>
-                        </div>
-                    </li>
-                </ul>
-            </div>
-        </header>
+{{define "main"}}
 
-        <!-- Main Form -->
-        <main class="main">
-            <div class="shorturl flex items-center" style="flex-direction: column;">
-                <img width="300" style="margin: 0 auto;" src="../static/images/500.png" alt="404">
-                <div style="margin-top: 24px; font-weight: bold; color: var(--theme-color);"><a href="#">Go Home</a></div>
-            </div>
-        </main>
+<main class="main">
+    <div class="errorpage flex items-center">
+        <img class="message" src="/static/images/500.png" alt="500">
+        <div class="gohome"><a href="/">Go Home</a></div>
     </div>
-</body>
+</main>
 
-</html>
+{{end}}

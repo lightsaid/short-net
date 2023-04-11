@@ -1,166 +1,131 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
+{{template "default" .}}
 
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Short Net</title>
-    <link rel="stylesheet" href="../static/styles/app.css">
-    <link rel="stylesheet" href="../static/styles/index.css">
-    <link rel="stylesheet" href="../static/styles/sign.css">
-    <link rel="stylesheet" href="../static/fonts/iconfont/iconfont.css">
-</head>
+{{define "css"}}
 
-<body>
-    <div class="container">
-        <header class="header">
-            <div class="logo">
-                <a href="#">
-                    <img src="../static/images/logo.png" alt="logo">
-                </a>
-            </div>
-            <div class="navbar">
-                <ul class="flex items-center sign-btns">
-                    <li>
-                        <a href="#" class="flex items-center">
-                            <i class="iconfont icon-dengluyonghuming" style="font-size: 19px;"></i>
-                            <span class="flex items-center">&nbsp;Register<i style="font-weight: bold; font-size: 12px;">&nbsp;/&nbsp;</i>Login</span>
-                        </a>
-                    </li>
-                </ul>
-                <!-- <ul class="flex items-center">
-                    <li><a href="#">MyURLs</a></li>
-                    <li>
-                        <div class="userinfo flex items-center">
-                            <div class="avatar">
-                                <a href="#">
-                                    <img src="../static/images/avatar1.png" alt="avatar">
-                                </a>
-                            </div>
-                            <a href="#">Lightsaid</a>
-                        </div>
-                    </li>
-                </ul> -->
-            </div>
-        </header>
+<link rel="stylesheet" href="../static/styles/sign.css">
 
-        <!-- Main Sign Form -->
-        <main class="main">
-            <div class="sign-container">
-                <div class="forms">
-                    <div class="form login">
-                        <span class="title">Login</span>
+{{end}}
 
-                        <!-- 登录 Form -->
-                        <form action="#">
-                            <div class="input-field">
-                                <input type="text" placeholder="Enter your email" required>
-                                <i class="icon iconfont icon-youxiang"></i>
-                            </div>
-                            <div class="input-field">
-                                <input type="password" class="password" placeholder="Enter your password" required>
-                                <i class="icon iconfont icon-lock"></i>
-                                <i class="iconfont icon-yincang showHidePw"></i>
-                            </div>
 
-                            <div class="checkbox-text">
-                                <div class="checkbox-content">
-                                    <input type="checkbox" id="logCheck">
-                                    <label for="logCheck" class="text">Remember me</label>
-                                </div>
+{{define "main" }}
 
-                                <a href="#" class="text">Forgot password?</a>
-                            </div>
+<main class="main">
+    <div class="sign-container">
+        <div class="forms">
+            <div class="form login">
+                <span class="title">Login</span>
 
-                            <div class="input-field button">
-                                <input type="button" value="Login Now">
-                            </div>
-                        </form>
-
-                        <div class="login-signup">
-                            <span class="text">Not a account?
-                                <a href="#" class="text signup-link">Register now</a>
-                            </span>
-                        </div>
+                <!-- 登录 Form -->
+                <form action="#">
+                    <div class="input-field">
+                        <input type="text" placeholder="Enter your email" required>
+                        <i class="icon iconfont icon-youxiang"></i>
+                    </div>
+                    <div class="input-field">
+                        <input type="password" class="password" placeholder="Enter your password" required>
+                        <i class="icon iconfont icon-lock"></i>
+                        <i class="iconfont icon-yincang showHidePw"></i>
                     </div>
 
-                    <!-- 注册 Form -->
-                    <div class="form signup">
-                        <span class="title">Register</span>
-
-                        <form action="#">
-                            <div class="input-field">
-                                <input type="text" placeholder="Enter your name" required>
-                                <i class="iconfont icon-wode" style="font-size: 19px;"></i>
-                            </div>
-                            <div class="input-field">
-                                <input type="text" placeholder="Enter your email" required>
-                                <i class="iconfont icon-youxiang icon"></i>
-                            </div>
-                            <div class="input-field">
-                                <input type="password" class="password" placeholder="Create a password" required>
-                                <i class="iconfont icon-lock icon"></i>
-                            </div>
-                            <div class="input-field">
-                                <input type="password" class="password" placeholder="Confirm a password" required>
-                                <i class="iconfont icon-lock icon"></i>
-                                <i class="iconfont icon-yincang showHidePw"></i>
-                            </div>
-
-                            <div class="input-field button">
-                                <input type="button" value="Register Now">
-                            </div>
-                        </form>
-
-                        <div class="login-signup">
-                            <span class="text">Already a acount?
-                                <a href="#" class="text login-link">Login now</a>
-                            </span>
+                    <div class="checkbox-text">
+                        <div class="checkbox-content">
+                            <input type="checkbox" id="logCheck">
+                            <label for="logCheck" class="text">Remember me</label>
                         </div>
+
+                        <a href="/forgot" class="text">Forgot password?</a>
                     </div>
+
+                    <div class="input-field button">
+                        <input type="button" value="Login Now">
+                    </div>
+                </form>
+
+                <div class="login-signup">
+                    <span class="text">Not a account?
+                        <a href="#" class="text signup-link">Register now</a>
+                    </span>
                 </div>
             </div>
-        </main>
+
+            <!-- 注册 Form -->
+            <div class="form signup">
+                <span class="title">Register</span>
+
+                <form action="#">
+                    <div class="input-field">
+                        <input type="text" placeholder="Enter your name" required>
+                        <i class="iconfont icon-wode" style="font-size: 19px;"></i>
+                    </div>
+                    <div class="input-field">
+                        <input type="text" placeholder="Enter your email" required>
+                        <i class="iconfont icon-youxiang icon"></i>
+                    </div>
+                    <div class="input-field">
+                        <input type="password" class="password" placeholder="Create a password" required>
+                        <i class="iconfont icon-lock icon"></i>
+                    </div>
+                    <div class="input-field">
+                        <input type="password" class="password" placeholder="Confirm a password" required>
+                        <i class="iconfont icon-lock icon"></i>
+                        <i class="iconfont icon-yincang showHidePw"></i>
+                    </div>
+
+                    <div class="input-field button">
+                        <input type="button" value="Register Now">
+                    </div>
+                </form>
+
+                <div class="login-signup">
+                    <span class="text">Already a acount?
+                        <a href="#" class="text login-link">Login now</a>
+                    </span>
+                </div>
+            </div>
+        </div>
     </div>
+</main>
 
-    <script>
-        const container = document.querySelector(".sign-container"),
-            pwShowHide = document.querySelectorAll(".showHidePw"),
-            pwFields = document.querySelectorAll(".password"),
-            signUp = document.querySelector(".signup-link"),
-            login = document.querySelector(".login-link");
+{{end}}
 
-        // 显示隐藏密码
-        pwShowHide.forEach(eyeIcon => {
-            eyeIcon.addEventListener("click", () => {
-                pwFields.forEach(pwField => {
-                    if (pwField.type === "password") {
-                        pwField.type = "text";
 
-                        pwShowHide.forEach(icon => {
-                            icon.classList.replace("icon-yincang", "icon-xianshi");
-                        })
-                    } else {
-                        pwField.type = "password";
-                        pwShowHide.forEach(icon => {
-                            icon.classList.replace("icon-xianshi", "icon-yincang");
-                        })
-                    }
-                })
+{{define "js"}}
+
+<script>
+    const container = document.querySelector(".sign-container"),
+        pwShowHide = document.querySelectorAll(".showHidePw"),
+        pwFields = document.querySelectorAll(".password"),
+        signUp = document.querySelector(".signup-link"),
+        login = document.querySelector(".login-link");
+
+    // 显示隐藏密码
+    pwShowHide.forEach(eyeIcon => {
+        eyeIcon.addEventListener("click", () => {
+            pwFields.forEach(pwField => {
+                if (pwField.type === "password") {
+                    pwField.type = "text";
+
+                    pwShowHide.forEach(icon => {
+                        icon.classList.replace("icon-yincang", "icon-xianshi");
+                    })
+                } else {
+                    pwField.type = "password";
+                    pwShowHide.forEach(icon => {
+                        icon.classList.replace("icon-xianshi", "icon-yincang");
+                    })
+                }
             })
         })
+    })
 
-        // 注册表单和登录表单切换
-        signUp.addEventListener("click", () => {
-            container.classList.add("active");
-        });
+    // 注册表单和登录表单切换
+    signUp.addEventListener("click", () => {
+        container.classList.add("active");
+    });
 
-        login.addEventListener("click", () => {
-            container.classList.remove("active");
-        });
-    </script>
+    login.addEventListener("click", () => {
+        container.classList.remove("active");
+    });
+</script>
 
-</body>
-
-</html>
+{{end}}
