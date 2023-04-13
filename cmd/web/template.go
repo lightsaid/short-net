@@ -1,14 +1,31 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"html/template"
 	"net/http"
 	"path/filepath"
 
+	"github.com/lightsaid/gotk/form"
 	"golang.org/x/exp/slog"
 )
 
+// renderData 渲染模版需要用的数据
+type renderData struct {
+	Form      *form.Form // 表单数据，如在表单提供验证不通过时，通过自此字段返回错误信息
+	Flash     string     // 操作成功通过
+	Error     string     // 操作错误通知
+	StringMap map[string]string
+}
+
+func (app *application) newRenderData() *renderData {
+	return &renderData{
+		Form: form.New(nil),
+	}
+}
+
+// genTemplateCache 生成模版缓存
 func (app *application) genTemplateCache() error {
 	slog.Info("templates base path", "path", app.env.ViewPath+"/*.page.html")
 	pages, err := filepath.Glob(fmt.Sprintf("%s/*.page.html", app.env.ViewPath))
@@ -47,15 +64,26 @@ func (app *application) genTemplateCache() error {
 	return nil
 }
 
-func (app *application) renderTemplate(w http.ResponseWriter, r *http.Request, tplname string) {
+// renderTemplate 根据 tplname 渲染模板
+func (app *application) renderTemplate(w http.ResponseWriter, r *http.Request, tplname string, data *renderData) {
 	t, exists := app.templateCache[tplname]
 	if !exists {
 		slog.Error("template not found", "tplname", tplname)
+
 		// 错误处理
+		http.Redirect(w, r, "/notfound", http.StatusSeeOther)
 		return
 	}
 
-	err := t.Execute(w, nil)
+	buf := new(bytes.Buffer)
+	err := t.Execute(buf, data)
+	if err != nil {
+		slog.Error("执行模版错误: "+err.Error(), "tplname", tplname, "data", data)
+		http.Redirect(w, r, "/servererror", http.StatusSeeOther)
+		return
+	}
+
+	err = t.Execute(w, data)
 	if err != nil {
 		slog.Error("render template 'Execute' error: "+err.Error(), "tplname", tplname)
 	}

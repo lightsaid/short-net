@@ -13,6 +13,7 @@ services:
       - default  # 使用默认网络，bridge 模式，容器之间可以访问
     depends_on:   # 容器启动先后次序，这里先启动 mysql，但并一定是mysq启动完成后再启动web
       - mysqldb
+      - mailhog
 
     # 环境变量，这是设置web服务的环境变量，当执行 go run main.go 时，
     # 这些环境变量是加载到程序的，可以通过 os.Getenv(key) 获取。
@@ -42,6 +43,15 @@ services:
       MYSQL_PASSWORD: ${DB_PASSWORD}
     volumes:
       - ${DB_STORAGE}:/var/lib/mysql
+    networks:
+      - default
+
+  # 本地接受邮件服务，用于开发测试
+  mailhog:
+    image: 'mailhog/mailhog:latest'
+    ports:
+      - "1025:1025"
+      - "8025:8025"
     networks:
       - default
 

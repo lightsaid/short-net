@@ -10,29 +10,39 @@
 {{define "main" }}
 
 <main class="main">
-    <div class="sign-container">
+    <div class="sign-container" >
         <div class="forms">
+            {{with .Error}}
+                <p style="color: red;">{{.}}</p>
+            {{end}}
             <div class="form login">
                 <span class="title">Login</span>
 
                 <!-- 登录 Form -->
-                <form action="#">
-                    <div class="input-field">
-                        <input type="text" placeholder="Enter your email" required>
+                <form action="/login" method="post">
+                    <div class="input-field  {{with .Form.Errors.Get "email"}}error{{end}}">
+                        <input type="text" placeholder="Enter your email" name="email" 
+                        value='{{with .Form.Get "email"}}{{.}}{{end}}' required>
                         <i class="icon iconfont icon-youxiang"></i>
                     </div>
+                    {{with .Form.Errors.Get "email"}}
+                        <p class="error-msg">{{.}}</p>
+                    {{end}}
+
                     <div class="input-field">
                         <input type="password" class="password" placeholder="Enter your password" required>
                         <i class="icon iconfont icon-lock"></i>
                         <i class="iconfont icon-yincang showHidePw"></i>
                     </div>
+                    {{with .Form.Errors.Get "password"}}
+                        <p class="error-msg">{{.}}</p>
+                    {{end}}
 
                     <div class="checkbox-text">
                         <div class="checkbox-content">
                             <input type="checkbox" id="logCheck">
                             <label for="logCheck" class="text">Remember me</label>
                         </div>
-
                         <a href="/forgot" class="text">Forgot password?</a>
                     </div>
 
@@ -52,27 +62,44 @@
             <div class="form signup">
                 <span class="title">Register</span>
 
-                <form action="#">
-                    <div class="input-field">
-                        <input type="text" placeholder="Enter your name" required>
+                <form action="/register" method="post">
+                    <div class="input-field {{with .Form.Errors.Get "name"}}error{{end}}">
+                        <input type="text" name="name" placeholder="Enter your name" 
+                        value='{{with .Form.Get "name"}}{{.}}{{end}}' required>
                         <i class="iconfont icon-wode" style="font-size: 19px;"></i>
                     </div>
-                    <div class="input-field">
-                        <input type="text" placeholder="Enter your email" required>
+                    {{with .Form.Errors.Get "name"}}
+                        <p class="error-msg">{{.}}</p>
+                    {{end}}
+
+                    <div class="input-field {{with .Form.Errors.Get "email"}}error{{end}}">
+                        <input type="text" name="email" placeholder="Enter your email"
+                        value='{{with .Form.Get "email"}}{{.}}{{end}}' required>
                         <i class="iconfont icon-youxiang icon"></i>
                     </div>
-                    <div class="input-field">
-                        <input type="password" class="password" placeholder="Create a password" required>
+                    {{with .Form.Errors.Get "email"}}
+                        <p class="error-msg">{{.}}</p>
+                    {{end}}
+
+                    <div class="input-field {{with .Form.Errors.Get "password"}}error{{end}}">
+                        <input type="password" name="password" class="password" placeholder="Create a password" required>
                         <i class="iconfont icon-lock icon"></i>
                     </div>
-                    <div class="input-field">
-                        <input type="password" class="password" placeholder="Confirm a password" required>
+                    {{with .Form.Errors.Get "password"}}
+                        <p class="error-msg">{{.}}</p>
+                    {{end}}
+
+                    <div class="input-field {{with .Form.Errors.Get "repassword"}}error{{end}}">
+                        <input type="password"  name="repassword" class="password" placeholder="Confirm a password" required>
                         <i class="iconfont icon-lock icon"></i>
                         <i class="iconfont icon-yincang showHidePw"></i>
                     </div>
+                    {{with .Form.Errors.Get "repassword"}}
+                        <p class="error-msg">{{.}}</p>
+                    {{end}}
 
                     <div class="input-field button">
-                        <input type="button" value="Register Now">
+                        <input type="submit" value="Register Now">
                     </div>
                 </form>
 
@@ -126,6 +153,11 @@
     login.addEventListener("click", () => {
         container.classList.remove("active");
     });
+
+    if (location.search.includes("t=1")) {
+        container.classList.add("active");
+    }
+
 </script>
 
 {{end}}

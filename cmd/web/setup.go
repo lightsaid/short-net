@@ -4,9 +4,11 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"time"
 
+	"github.com/alexedwards/scs/v2"
 	"github.com/lightsaid/short-net/models"
 	"github.com/lightsaid/short-net/util"
 	"github.com/natefinch/lumberjack"
@@ -122,4 +124,20 @@ func connectDB(mylog *log.Logger, colorful bool) (*gorm.DB, error) {
 	)
 
 	return gorm.Open(mysql.Open(os.Getenv("DB_SOURCE")), &gorm.Config{Logger: logConfig})
+}
+
+// setupCookieMgr 设置cookie管理
+func setupSessionMgr(env *envConfig) *scs.SessionManager {
+	var secure bool
+	if env.RunMode == "prod" {
+		secure = true
+	}
+
+	sessionMgr := scs.New()
+	sessionMgr.Lifetime = 24 * time.Hour
+	sessionMgr.Cookie.Persist = true
+	sessionMgr.Cookie.SameSite = http.SameSiteLaxMode
+	sessionMgr.Cookie.Secure = secure
+
+	return sessionMgr
 }

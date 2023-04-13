@@ -1,0 +1,19 @@
+{{template "default" .}}
+
+{{define "css"}}
+<link rel="stylesheet" href="/static//styles/error.css">
+{{end}}
+
+{{define "main"}}
+{{$message := index .StringMap "message"}}
+<main class="main">
+    <div class="errorpage flex items-center">
+        {{with $message}}
+            <p style="padding-top: 100px; color: green;">{{.}}</p> 
+        {{end}}
+        <div class="gohome"><a href="/">回首页</a></div>
+        <!-- TODO: 如果没收到邮件的情况 -->
+    </div>
+</main>
+
+{{end}}

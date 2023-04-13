@@ -1,6 +1,7 @@
 :root {
     box-sizing: border-box;
     --theme-color: #2F9BD9;
+    --error-color: #db2828;
 }
 
 *,

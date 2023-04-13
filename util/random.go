@@ -23,3 +23,8 @@ func RandomString(n int) string {
 
 	return sb.String()
 }
+
+// RandomInt 随机数 【min, max】
+func RandomInt(min, max int) int {
+	return rand.Intn(max-min+1) + min
+}

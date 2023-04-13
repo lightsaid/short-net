@@ -21,6 +21,13 @@ type Repository interface {
 	UpdateLinkByID(id uint, link models.Link) error
 	DeleteLinkByID(id uint) error
 	ListLinksByUserID(userID uint, f Filters) ([]*models.Link, error)
+
+	// transaction
+
+	// NOTE: 这里尝试一个新做法：通过 callback 函数解耦注册和发送邮件（严格意义来讲，也不是解耦）
+	// 注册事物，user 是用户对象，cb 函数告知事物已经执行创建用户这一步，但并没有真正提及事物,
+	// 等待发送邮件成功后再提交事物，因此可以在 callback 函数里根据错误信息提前做出响应
+	// TxRegister(user *models.User, cb func(err error)) error
 }
 
 type repository struct {
@@ -43,7 +50,22 @@ func (r *repository) execTx(fn func(Repository) error) error {
 		if rbErr := tx.Rollback().Error; rbErr != nil {
 			return fmt.Errorf("execTx err: %v, rb err: %v", err, rbErr)
 		}
+		return err
 	}
 
 	return tx.Commit().Error
 }
+
+// TxRegister 注册事物
+// func (r *repository) TxRegister(user *models.User, callback func(err error)) error {
+// 	return r.execTx(func(r Repository) error {
+// 		err := r.CreateUser(user)
+// 		callback(err)
+// 		if err != nil {
+// 			return err
+// 		}
+
+// 		 TODO:发送邮件
+// 		return errors.New("故意而为之～")
+// 	})
+// }

@@ -101,6 +101,25 @@
     color: var(--theme-color);
 }
 
+.input-field.error input ~ i{
+    color: var(--error-color);
+}
+
+.input-field.error input{
+    border-bottom-color: var(--error-color);
+    color: var(--error-color);
+}
+
+.error-msg{
+    position: absolute;
+    font-size: 14px;
+    color: var(--error-color);
+}
+
+.input-field.error input::placeholder{
+    color: var(--error-color);
+}
+
 .input-field i.icon{
     left: 0;
 }
@@ -137,6 +156,7 @@
     color: var(--theme-color);
     text-decoration: none;
 }
+
 .form a:hover{
     text-decoration: underline;
 }

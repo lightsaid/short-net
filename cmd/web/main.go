@@ -1,42 +1,27 @@
 package main
 
 import (
+	"encoding/gob"
 	"html/template"
 	"sync"
 	"time"
 
+	"github.com/alexedwards/scs/v2"
+	"github.com/lightsaid/short-net/dbrepo"
+	"github.com/lightsaid/short-net/mailer"
 	"github.com/lightsaid/short-net/models"
 )
-
-type envConfig struct {
-	DBPort         int    `mapstruct:"DB_PORT"`
-	DBName         string `mapstruct:"DB_NAME"`
-	DBPassword     string `mapstruct:"DB_PASSWORD"`
-	HTTPServerPort int    `mapstruct:"HTTP_SERVER_PORT"`
-	RunMode        string `mapstruct:"RUN_MODE"`
-	MySQLLog       string `mapstruct:"MYSQL_LOG"`
-	AccessLog      string `mapstruct:"ACCESS_LOG"`
-	ViewPath       string `mapstruct:"VIEW_PATH"`
-}
 
 type application struct {
 	env           envConfig
 	shortID       uint
+	store         dbrepo.Repository
 	templateCache map[string]*template.Template
+	sessionMgr    *scs.SessionManager
+	mailer        mailer.Mailer
 	wg            sync.WaitGroup
 	mutex         sync.RWMutex
 }
-
-// func main() {
-// 	fs := http.FileServer(http.Dir("./static"))
-// 	http.Handle("/static/", http.StripPrefix("/static/", fs))
-
-// 	log.Print("Listening on :4000...")
-// 	err := http.ListenAndServe(":4000", nil)
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-// }
 
 func main() {
 	// 加载配置
@@ -65,11 +50,26 @@ func main() {
 	shortID := setupShortID(db)
 
 	var app = application{
-		env:     envConf,
-		shortID: shortID,
-		wg:      sync.WaitGroup{},
-		mutex:   sync.RWMutex{},
+		env:        envConf,
+		shortID:    shortID,
+		sessionMgr: setupSessionMgr(&envConf),
+		wg:         sync.WaitGroup{},
+		mutex:      sync.RWMutex{},
 	}
+
+	app.mailer = mailer.NewMailSender(
+		envConf.SmtpAuthAddress,
+		envConf.SmtpServerAddress,
+		envConf.MailSenderName,
+		envConf.MailSenderAddress,
+		envConf.MailSenderPassword,
+	)
+
+	app.store = dbrepo.NewRepository(db)
+
+	// 注册 gob 数据，用于序列化 cookie 存储的数据
+	gob.Register(renderData{})
+	gob.Register(models.User{})
 
 	app.genTemplateCache()
 
