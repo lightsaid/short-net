@@ -7,10 +7,13 @@ import (
 	"net/http"
 
 	"github.com/go-sql-driver/mysql"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/lightsaid/gotk/form"
+	"github.com/lightsaid/gotk/mux"
 	"github.com/lightsaid/short-net/models"
 	"github.com/lightsaid/short-net/util"
 	"golang.org/x/exp/slog"
+	"gorm.io/gorm"
 )
 
 var (
@@ -86,6 +89,7 @@ func (app *application) registerHandler(w http.ResponseWriter, r *http.Request) 
 
 	qUser, _ := app.store.GetUserByEmail(user.Email)
 	if qUser.ID > 0 {
+		f.Errors.Add("email", "邮箱已被使用")
 		data := renderData{
 			Error: "邮箱已被使用",
 			Form:  f,
@@ -111,17 +115,26 @@ func (app *application) registerHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	// 发送邮件
+	// 在背后起协程发送邮件
 	app.execInBackgorund(func() {
+		// 生成 Token
+		token, _, err := app.tokenMaker.GenToken(user.ID, app.env.MaxActivateTime)
+		if err != nil {
+			slog.Error("GenToken failed: "+err.Error(), "email", user.Email, "id", user.ID)
+			http.Redirect(w, r, "/servererror", http.StatusSeeOther)
+			return
+		}
+
+		link := fmt.Sprintf("%s:%d/activate/%s", app.env.HTTPServerHost, app.env.HTTPServerPort, token)
+
 		subject := "激活邮件"
 		content := `
 			<h1>您好，欢迎注册 ShortNet</h1>
 			<p>如果是你本人注册 ShortNet，请点击下面激活账户，若不是请忽略该邮件。</p>
-			<p><a href="https://localhost:4000">激活账户</a></p>
-		`
+		` + "<p><a href='" + link + "'>激活账户</a></p>"
 		to := []string{user.Email}
 
-		err := app.mailer.SendEmail(subject, content, to, nil, nil, nil)
+		err = app.mailer.SendEmail(subject, content, to, nil, nil, nil)
 		if err != nil {
 			slog.Error("sender register error: "+err.Error(), "email", user.Email)
 		}
@@ -159,6 +172,40 @@ func (app *application) registerHandler(w http.ResponseWriter, r *http.Request) 
 	// }
 }
 
+// activateHandler 激活用户
+func (app *application) activateHandler(w http.ResponseWriter, r *http.Request) {
+	token := mux.Param(r, "token")
+
+	payload, err := app.tokenMaker.VerifyToken(token)
+	if err != nil {
+		slog.Error("activateHandler", "error", err.Error(), "token", token)
+		if errors.Is(err, jwt.ErrTokenExpired) {
+			app.sessionMgr.Put(r.Context(), "error", "令牌过期，激活失败")
+		} else {
+			app.sessionMgr.Put(r.Context(), "error", "令牌无效")
+		}
+
+		http.Redirect(w, r, "/error", http.StatusSeeOther)
+		return
+	}
+
+	if payload.UserID <= 0 {
+		app.sessionMgr.Put(r.Context(), "error", "激活失败，用户ID不存在")
+		http.Redirect(w, r, "/error", http.StatusSeeOther)
+		return
+	}
+
+	err = app.store.ActiveUserByID(payload.UserID)
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		app.sessionMgr.Put(r.Context(), "error", "激活失败，用户不存在")
+		http.Redirect(w, r, "/error", http.StatusSeeOther)
+		return
+	}
+
+	app.sessionMgr.Put(r.Context(), "message", "激活成功")
+	http.Redirect(w, r, "/success", http.StatusSeeOther)
+}
+
 // loginHandler 登录
 func (app *application) loginHandler(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
@@ -193,6 +240,14 @@ func (app *application) operateSuccessfully(w http.ResponseWriter, r *http.Reque
 		},
 	}
 	app.renderTemplate(w, r, "success.page.html", &data)
+}
+
+func (app *application) errorHandler(w http.ResponseWriter, r *http.Request) {
+	errMsg := app.sessionMgr.PopString(r.Context(), "error")
+	if errMsg == "" {
+		errMsg = "操作失败"
+	}
+	app.renderTemplate(w, r, "error.page.html", &renderData{Error: errMsg})
 }
 
 func (app *application) forgotHandler(w http.ResponseWriter, r *http.Request) {

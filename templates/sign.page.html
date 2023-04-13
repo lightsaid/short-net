@@ -12,9 +12,6 @@
 <main class="main">
     <div class="sign-container" >
         <div class="forms">
-            {{with .Error}}
-                <p style="color: red;">{{.}}</p>
-            {{end}}
             <div class="form login">
                 <span class="title">Login</span>
 
@@ -119,6 +116,11 @@
 {{define "js"}}
 
 <script>
+
+    {{with .Error}}
+        console.log("{{.}}")
+    {{end}} 
+
     const container = document.querySelector(".sign-container"),
         pwShowHide = document.querySelectorAll(".showHidePw"),
         pwFields = document.querySelectorAll(".password"),

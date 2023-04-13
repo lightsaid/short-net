@@ -32,12 +32,14 @@ func (app *application) showpages(r *mux.ServeMux) {
 	r.GET("/notfound", app.notFoundHandler)
 	r.GET("/servererror", app.serverErrorHandler)
 	r.GET("/success", app.operateSuccessfully)
+	r.GET("/error", app.errorHandler)
 }
 
 // 登录注册逻辑
 func (app *application) signLogicHandler(r *mux.ServeMux) {
 	r.POST("/login", app.loginHandler)
 	r.POST("/register", app.registerHandler)
+	r.GET("/activate/:token", app.activateHandler)
 }
 
 // userLogicHandler 用户handler

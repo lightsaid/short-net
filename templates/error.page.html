@@ -1,0 +1,17 @@
+{{template "default" .}}
+
+{{define "css"}}
+<link rel="stylesheet" href="/static//styles/error.css">
+{{end}}
+
+{{define "main"}}
+<main class="main">
+    <div class="errorpage flex items-center">
+        {{with .Error}}
+            <p style="padding-top: 100px; color: red;">{{.}}</p> 
+        {{end}}
+        <div class="gohome"><a href="/">回首页</a></div>
+    </div>
+</main>
+
+{{end}}

@@ -34,3 +34,12 @@ func (r *repository) UpdateUserByID(id uint, user models.User) error {
 	}
 	return r.DB.Save(&q).Error
 }
+
+func (r *repository) ActiveUserByID(id uint) error {
+	var user models.User
+	err := r.DB.First(&user, id).Error
+	if err != nil {
+		return err
+	}
+	return r.DB.Model(&user).Update("active", 1).Error
+}

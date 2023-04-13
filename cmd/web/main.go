@@ -10,6 +10,7 @@ import (
 	"github.com/lightsaid/short-net/dbrepo"
 	"github.com/lightsaid/short-net/mailer"
 	"github.com/lightsaid/short-net/models"
+	"github.com/lightsaid/short-net/token"
 )
 
 type application struct {
@@ -19,6 +20,7 @@ type application struct {
 	templateCache map[string]*template.Template
 	sessionMgr    *scs.SessionManager
 	mailer        mailer.Mailer
+	tokenMaker    token.Maker
 	wg            sync.WaitGroup
 	mutex         sync.RWMutex
 }
@@ -49,10 +51,15 @@ func main() {
 	// 获取link表最后一条记录的short_hash值对应数值，用于生成后续短网址
 	shortID := setupShortID(db)
 
+	// tokenMaker
+	tokenMaker, err := token.NewTokenMaker(envConf.TokenSecretKey)
+	fatalOnError(err, "token maker create failed")
+
 	var app = application{
 		env:        envConf,
 		shortID:    shortID,
 		sessionMgr: setupSessionMgr(&envConf),
+		tokenMaker: tokenMaker,
 		wg:         sync.WaitGroup{},
 		mutex:      sync.RWMutex{},
 	}

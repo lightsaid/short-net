@@ -13,6 +13,7 @@ type User struct {
 	Password  string         `json:"-" gorm:"type:varchar(64);not null;"`
 	Avatar    string         `json:"avatar" gorm:"type:varchar(255);not null;"`
 	Role      string         `json:"role" gorm:"type:varchar(64);default:'USER';not null;"`
+	Active    int            `json:"active" gorm:"default: 0"`
 	CreatedAt time.Time      `json:"created_at"`
 	UpdatedAt time.Time      `json:"updated_at"`
 	DeletedAt gorm.DeletedAt `json:"deleted_at" gorm:"index"`

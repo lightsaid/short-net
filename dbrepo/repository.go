@@ -21,6 +21,7 @@ type Repository interface {
 	UpdateLinkByID(id uint, link models.Link) error
 	DeleteLinkByID(id uint) error
 	ListLinksByUserID(userID uint, f Filters) ([]*models.Link, error)
+	ActiveUserByID(id uint) error
 
 	// transaction
 
