@@ -1,7 +1,12 @@
 :root {
     box-sizing: border-box;
-    --theme-color: #2F9BD9;
-    --error-color: #db2828;
+    --theme: #2F9BD9;
+    --dark: #34495E;
+    --light: #ffffff;
+    --success: #0ABF30;
+    --error: #E24D4C;
+    --warning: #E9BD0C;
+    --info: #3498DB;
 }
 
 *,

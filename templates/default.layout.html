@@ -10,12 +10,16 @@
     <link rel="stylesheet" href="/static/styles/app.css">
     <link rel="stylesheet" href="/static/styles/default.css">
     <link rel="stylesheet" href="/static/fonts/iconfont/iconfont.css">
+    <link rel="stylesheet" href="/static/fonts/fontawesome-free-6.2.1-web/css/all.min.css">
+    <link rel="stylesheet" href="/static/styles/toast.css">
     
     <!-- 页面 CSS -->
     {{block "css" .}} {{end}}
 </head>
 
 <body>
+    <!-- Toast 消息容器 -->
+    <ul class="notifications"></ul>
     <div class="container">
         <header class="header">
             <div class="logo">
@@ -52,7 +56,9 @@
         </header>
 
         <!-- 页面内容 -->
-        {{block "main" .}} {{end}}
+        {{block "main" .}} 
+
+        {{end}}
 
         <!-- 页面脚部 -->
         {{block "footer" .}} {{end}}
@@ -62,15 +68,26 @@
 
     </div>
 
+    <script src="/static/scripts/toast.js"></script>
 
     <script>
-        {{with .Flash}}
-            alert({{.}})
-        {{end}}
+        window.onload = function() {
+            {{with .Flash}}
+                window.createToast("success", {{.}})
+            {{end}}
 
-        {{with .Error}}
-            alert({{.}})
-        {{end}}
+            {{with .Error}}
+                window.createToast("error", {{.}})
+            {{end}}
+
+            {{with .Warning}}
+                window.createToast("warning", {{.}})
+            {{end}}
+
+            {{with .Info}}
+                window.createToast("info", {{.}})
+            {{end}}
+        }
     </script>
 
 </body>

@@ -267,7 +267,6 @@ func (app *application) loginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println(">>>>> user.ID", user.ID)
 	// NOTE: 这里 github.com/alexedwards/scs/v2 有个bug，存 uint、int64  数据会丢失
 	app.sessionMgr.Put(r.Context(), authRequiredKey, int(user.ID))
 

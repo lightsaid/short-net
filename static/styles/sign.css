@@ -55,7 +55,7 @@
     bottom: 0;
     height: 3px;
     width: 30px;
-    background-color: var(--theme-color);
+    background-color: var(--theme);
     border-radius: 25px;
 }
 
@@ -80,7 +80,7 @@
 }
 
 .input-field input:is(:focus, :valid){
-    border-bottom-color: var(--theme-color);
+    border-bottom-color: var(--theme);
 }
 
 .input-field i{
@@ -98,26 +98,26 @@
 }
 
 .input-field input:is(:focus, :valid) ~ i{
-    color: var(--theme-color);
+    color: var(--theme);
 }
 
 .input-field.error input ~ i{
-    color: var(--error-color);
+    color: var(--error);
 }
 
 .input-field.error input{
-    border-bottom-color: var(--error-color);
-    color: var(--error-color);
+    border-bottom-color: var(--error);
+    color: var(--error);
 }
 
 .error-msg{
     position: absolute;
     font-size: 14px;
-    color: var(--error-color);
+    color: var(--error);
 }
 
 .input-field.error input::placeholder{
-    color: var(--error-color);
+    color: var(--error);
 }
 
 .input-field i.icon{
@@ -144,7 +144,7 @@
 
 .checkbox-content input{
     margin: 0 8px -2px 4px;
-    accent-color: var(--theme-color);
+    accent-color: var(--theme);
 }
 
 .form .text{
@@ -153,7 +153,7 @@
 }
 
 .form a.text{
-    color: var(--theme-color);
+    color: var(--theme);
     text-decoration: none;
 }
 
@@ -172,13 +172,13 @@
     font-weight: 500;
     letter-spacing: 1px;
     border-radius: 6px;
-    background-color: var(--theme-color);
+    background-color: var(--theme);
     cursor: pointer;
     transition: all 0.3s ease;
 }
 
 .button input:hover{
-    background-color: var(--theme-color);
+    background-color: var(--theme);
     opacity: 0.8;
     letter-spacing: 2px;
 }

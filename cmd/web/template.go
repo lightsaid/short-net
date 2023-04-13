@@ -18,9 +18,11 @@ type renderData struct {
 	Form      *form.Form        // 表单数据，如在表单提供验证不通过时，通过自此字段返回错误信息
 	Flash     string            // 操作成功通过
 	Error     string            // 操作错误通知
+	Warning   string            // 警告通知
+	Info      string            // 普通通知
 	StringMap map[string]string // string map
-	CSRFToken string
-	IsLogin   int
+	CSRFToken string            // csrf token
+	IsLogin   int               // 是否已经登录
 }
 
 func (app *application) newRenderData() *renderData {
@@ -73,15 +75,19 @@ func (app *application) addDefaultData(r *http.Request, data *renderData) *rende
 	if data == nil {
 		data = app.newRenderData()
 	}
+
 	data.CSRFToken = nosurf.Token(r)
+
 	data.Error = app.sessionMgr.PopString(r.Context(), "error")
 	data.Flash = app.sessionMgr.PopString(r.Context(), "flash")
+	data.Warning = app.sessionMgr.PopString(r.Context(), "flash")
+	data.Info = app.sessionMgr.PopString(r.Context(), "info")
+
+	// 是否登录
 	if _, ok := app.IsLogin(r); ok {
-		fmt.Println(">>>>>>>>>>>>", ok)
 		data.IsLogin = 1
-	} else {
-		fmt.Println(">>>>>>>>>>>>", ok)
 	}
+
 	return data
 }
 
