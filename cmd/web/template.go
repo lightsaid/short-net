@@ -7,16 +7,19 @@ import (
 	"net/http"
 	"path/filepath"
 
+	"github.com/justinas/nosurf"
 	"github.com/lightsaid/gotk/form"
+
 	"golang.org/x/exp/slog"
 )
 
 // renderData 渲染模版需要用的数据
 type renderData struct {
-	Form      *form.Form // 表单数据，如在表单提供验证不通过时，通过自此字段返回错误信息
-	Flash     string     // 操作成功通过
-	Error     string     // 操作错误通知
-	StringMap map[string]string
+	Form      *form.Form        // 表单数据，如在表单提供验证不通过时，通过自此字段返回错误信息
+	Flash     string            // 操作成功通过
+	Error     string            // 操作错误通知
+	StringMap map[string]string // string map
+	CSRFToken string
 }
 
 func (app *application) newRenderData() *renderData {
@@ -64,6 +67,17 @@ func (app *application) genTemplateCache() error {
 	return nil
 }
 
+// addDefaultData 添加一些默认数据
+func (app *application) addDefaultData(r *http.Request, data *renderData) *renderData {
+	if data == nil {
+		data = app.newRenderData()
+	}
+	data.CSRFToken = nosurf.Token(r)
+	data.Error = app.sessionMgr.PopString(r.Context(), "error")
+	data.Flash = app.sessionMgr.PopString(r.Context(), "flash")
+	return data
+}
+
 // renderTemplate 根据 tplname 渲染模板
 func (app *application) renderTemplate(w http.ResponseWriter, r *http.Request, tplname string, data *renderData) {
 	t, exists := app.templateCache[tplname]
@@ -75,6 +89,8 @@ func (app *application) renderTemplate(w http.ResponseWriter, r *http.Request, t
 		return
 	}
 
+	data = app.addDefaultData(r, data)
+
 	buf := new(bytes.Buffer)
 	err := t.Execute(buf, data)
 	if err != nil {
@@ -83,7 +99,8 @@ func (app *application) renderTemplate(w http.ResponseWriter, r *http.Request, t
 		return
 	}
 
-	err = t.Execute(w, data)
+	// err = t.Execute(w, data)
+	_, err = buf.WriteTo(w)
 	if err != nil {
 		slog.Error("render template 'Execute' error: "+err.Error(), "tplname", tplname)
 	}

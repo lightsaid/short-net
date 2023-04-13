@@ -10,6 +10,8 @@ func (app *application) setupRoute() *mux.ServeMux {
 	// NOTE: 使用 github.com/alexedwards/scs/v2 要执行 LoadAndSave()，
 	// 否则会各种 panic
 	r.Use(app.loadSessionAndSave)
+	r.Use(app.csrfMiddleware)
+	r.Use(app.recovererMiddleware)
 	r.Use(app.loggerMiddleware)
 
 	app.showpages(r)

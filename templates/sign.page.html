@@ -17,6 +17,7 @@
 
                 <!-- 登录 Form -->
                 <form action="/login" method="post">
+                    <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
                     <div class="input-field  {{with .Form.Errors.Get "email"}}error{{end}}">
                         <input type="text" placeholder="Enter your email" name="email" 
                         value='{{with .Form.Get "email"}}{{.}}{{end}}' required>
@@ -44,7 +45,7 @@
                     </div>
 
                     <div class="input-field button">
-                        <input type="button" value="Login Now">
+                        <input type="submit" value="Login Now">
                     </div>
                 </form>
 
@@ -60,6 +61,7 @@
                 <span class="title">Register</span>
 
                 <form action="/register" method="post">
+                    <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
                     <div class="input-field {{with .Form.Errors.Get "name"}}error{{end}}">
                         <input type="text" name="name" placeholder="Enter your name" 
                         value='{{with .Form.Get "name"}}{{.}}{{end}}' required>
