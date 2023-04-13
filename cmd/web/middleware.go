@@ -41,7 +41,7 @@ func (app *application) csrfMiddleware(next http.Handler) http.Handler {
 
 // recovererMiddleware 恐慌恢复
 func (app *application) recovererMiddleware(next http.Handler) http.Handler {
-	fn := func(w http.ResponseWriter, r *http.Request) {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
 			if r := recover(); r != nil && r != http.ErrAbortHandler {
 				slog.Error("PANIC", "recover", r)
@@ -50,7 +50,17 @@ func (app *application) recovererMiddleware(next http.Handler) http.Handler {
 		}()
 
 		next.ServeHTTP(w, r)
-	}
+	})
+}
 
-	return http.HandlerFunc(fn)
+// authRequired 身份认证
+func (app *application) authRequired(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if _, isLogin := app.IsLogin(r); !isLogin {
+			app.sessionMgr.Put(r.Context(), "error", "请先登录")
+			http.Redirect(w, r, "/sign", http.StatusSeeOther)
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
 }

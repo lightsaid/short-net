@@ -30,7 +30,7 @@ func (app *application) showpages(r *mux.ServeMux) {
 	r.GET("/", app.indexHandler)
 	r.GET("/sign", app.signHandler)
 	r.GET("/forgot", app.forgotHandler)
-	r.GET("/reset", app.resetHandler)
+	r.GET("/reset", app.resetHandler).Use(app.authRequired)
 	r.GET("/notfound", app.notFoundHandler)
 	r.GET("/servererror", app.serverErrorHandler)
 	r.GET("/success", app.operateSuccessfully)

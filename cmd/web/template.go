@@ -20,6 +20,7 @@ type renderData struct {
 	Error     string            // 操作错误通知
 	StringMap map[string]string // string map
 	CSRFToken string
+	IsLogin   int
 }
 
 func (app *application) newRenderData() *renderData {
@@ -75,6 +76,12 @@ func (app *application) addDefaultData(r *http.Request, data *renderData) *rende
 	data.CSRFToken = nosurf.Token(r)
 	data.Error = app.sessionMgr.PopString(r.Context(), "error")
 	data.Flash = app.sessionMgr.PopString(r.Context(), "flash")
+	if _, ok := app.IsLogin(r); ok {
+		fmt.Println(">>>>>>>>>>>>", ok)
+		data.IsLogin = 1
+	} else {
+		fmt.Println(">>>>>>>>>>>>", ok)
+	}
 	return data
 }
 

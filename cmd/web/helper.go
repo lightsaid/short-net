@@ -1,6 +1,9 @@
 package main
 
 import (
+	"fmt"
+	"net/http"
+
 	"golang.org/x/exp/slog"
 )
 
@@ -19,4 +22,16 @@ func (app *application) execInBackgorund(fn func()) {
 
 		fn()
 	}()
+}
+
+func (app *application) IsLogin(r *http.Request) (int, bool) {
+	if ok := app.sessionMgr.Exists(r.Context(), authRequiredKey); ok {
+		userID := app.sessionMgr.GetInt(r.Context(), authRequiredKey)
+		fmt.Println(">>>>>>>> ID: ", userID)
+		if userID > 0 {
+			return userID, true
+		}
+	}
+
+	return 0, false
 }

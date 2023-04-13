@@ -17,7 +17,8 @@ import (
 )
 
 var (
-	renderDataKey = "rednder_data"
+	renderDataKey   = "rednder_data"
+	authRequiredKey = "user_id"
 )
 
 func (app *application) indexHandler(w http.ResponseWriter, r *http.Request) {
@@ -215,9 +216,64 @@ func (app *application) loginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// f := form.New(r.PostForm)
-	// f.Required("")
-	app.renderTemplate(w, r, "sign.page.html", nil)
+	f := form.New(r.PostForm)
+
+	// 验证表单数据
+	f.Required("email")
+	f.Required("password")
+	f.IsEmail("email", "请输入合法的邮箱地址")
+	f.MinLength("password", 6, "密码长度必须大于或等于6")
+	f.MaxLength("password", 24, "密码长度必须小于或等于24")
+
+	data := renderData{
+		Form: f,
+	}
+
+	// 验证不通过
+	if !f.Valid() {
+		data.Error = "验证不通过"
+		app.sessionMgr.Put(r.Context(), renderDataKey, data)
+		http.Redirect(w, r, "/sign", http.StatusSeeOther)
+		return
+	}
+
+	// 查询用户
+	user, err := app.store.GetUserByEmail(f.Get("email"))
+	if err != nil {
+		data.Error = "查询用户失败"
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			f.Errors.Add("email", "用户不存在")
+			app.sessionMgr.Put(r.Context(), renderDataKey, data)
+			http.Redirect(w, r, "/sign", http.StatusSeeOther)
+			return
+		}
+		http.Redirect(w, r, "/servererror", http.StatusSeeOther)
+		return
+	}
+
+	err = util.CheckHashedPassword(user.Password, f.Get("password"))
+	if err != nil {
+		data.Error = "密码不正确"
+		f.Errors.Add("email", "邮箱或密码不匹配")
+		app.sessionMgr.Put(r.Context(), renderDataKey, data)
+		http.Redirect(w, r, "/sign", http.StatusSeeOther)
+		return
+	}
+
+	if user.Active == 0 {
+		f.Errors.Add("email", "用户未激活")
+		app.sessionMgr.Put(r.Context(), renderDataKey, data)
+		http.Redirect(w, r, "/sign", http.StatusSeeOther)
+		return
+	}
+
+	fmt.Println(">>>>> user.ID", user.ID)
+	// NOTE: 这里 github.com/alexedwards/scs/v2 有个bug，存 uint、int64  数据会丢失
+	app.sessionMgr.Put(r.Context(), authRequiredKey, int(user.ID))
+
+	app.sessionMgr.Put(r.Context(), "flash", "登录成功")
+
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
 func (app *application) notFoundHandler(w http.ResponseWriter, r *http.Request) {
