@@ -19,4 +19,5 @@ type envConfig struct {
 	MailSenderPassword string        `mapstruct:"MAIL_SENDER_PASSWORD"`
 	TokenSecretKey     string        `mapstruct:"TOKEN_SECRET_KEY"`
 	MaxActivateTime    time.Duration `mapstruct:"MAX_ACTIVATE_TIME"`
+	ShortDefaultExpire time.Duration `mapstruct:"SHORT_DEFAULT_EXPIRE"`
 }

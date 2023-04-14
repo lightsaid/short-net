@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/go-sql-driver/mysql"
 	"github.com/golang-jwt/jwt/v5"
@@ -20,6 +21,8 @@ var (
 	renderDataKey   = "rednder_data"
 	authRequiredKey = "user_id"
 )
+
+type jsonResponse map[string]interface{}
 
 func (app *application) indexHandler(w http.ResponseWriter, r *http.Request) {
 	app.renderTemplate(w, r, "index.page.html", nil)
@@ -211,7 +214,7 @@ func (app *application) activateHandler(w http.ResponseWriter, r *http.Request) 
 func (app *application) loginHandler(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
-		// TODO：错误提示
+		app.sessionMgr.Put(r.Context(), "error", "解析数据失败，未知错误")
 		app.renderTemplate(w, r, "sign.page.html", nil)
 		return
 	}
@@ -268,7 +271,10 @@ func (app *application) loginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// NOTE: 这里 github.com/alexedwards/scs/v2 有个bug，存 uint、int64  数据会丢失
+	// fmt.Println(">>>>> user.ID: ", user.ID)
 	app.sessionMgr.Put(r.Context(), authRequiredKey, int(user.ID))
+	// tmp := app.sessionMgr.GetInt(r.Context(), authRequiredKey)
+	// fmt.Println(">>>> tmp: ", tmp)
 
 	app.sessionMgr.Put(r.Context(), "flash", "登录成功")
 
@@ -311,4 +317,73 @@ func (app *application) forgotHandler(w http.ResponseWriter, r *http.Request) {
 
 func (app *application) resetHandler(w http.ResponseWriter, r *http.Request) {
 	app.renderTemplate(w, r, "reset.page.html", nil)
+}
+
+// ================================ 以下是 Link Table Handler ==============================================
+
+// createLinkHandler 创建 link 返回 json
+func (app *application) createLinkHandler(w http.ResponseWriter, r *http.Request) {
+	app.mutex.Lock()
+	defer app.mutex.Unlock()
+
+	// 解析表单并验证
+	r.ParseForm()
+	f := form.New(r.PostForm)
+	f.Required("long_url")
+	if !f.Valid() {
+		app.sessionMgr.Put(r.Context(), "error", "请输入长网址")
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+	rsp := make(jsonResponse)
+
+	app.shortID++
+	shortHashed := util.EncodeBase62(app.shortID)
+	userID, isLogin := app.IsLogin(r)
+	if !isLogin || userID <= 0 {
+		app.sessionMgr.Put(r.Context(), "info", "请先登录")
+		app.writeJSON(w, r, http.StatusBadRequest, rsp)
+		return
+	}
+
+	fmt.Println("shortID: ", app.shortID, f.Get("long_url"))
+	link := &models.Link{
+		UserID:    userID,
+		LongURL:   f.Get("long_url"),
+		ShortHash: shortHashed,
+		ExpiredAt: time.Now().Add(app.env.ShortDefaultExpire),
+	}
+
+	err := app.createLink(link)
+	if err != nil {
+		rsp["error"] = "服务内部错"
+		app.writeJSON(w, r, http.StatusInternalServerError, rsp)
+		return
+	}
+
+	rsp["data"] = link
+	app.writeJSON(w, r, http.StatusOK, rsp)
+}
+
+func (app *application) updateLinkHandler(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func (app *application) deleteLinkHandler(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func (app *application) redirectLinkHandler(w http.ResponseWriter, r *http.Request) {
+	hash := mux.Param(r, "hash")
+	link, err := app.store.GetLinkByHash(hash)
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+		r.Context().Done()
+		return
+	}
+	http.Redirect(w, r, link.LongURL, http.StatusSeeOther)
+}
+
+func (app *application) listLinksHandler(w http.ResponseWriter, r *http.Request) {
+
 }

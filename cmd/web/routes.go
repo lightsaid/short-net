@@ -47,6 +47,7 @@ func (app *application) signLogicHandler(r *mux.ServeMux) {
 // userLogicHandler 用户handler
 func (app *application) userLogicHandler(r *mux.ServeMux) {
 	m := r.RouteGroup("")
+	// TODO:
 	m.POST("/forgot", app.indexHandler)
 	m.POST("/reset", app.indexHandler)
 	m.POST("/profile", app.indexHandler)
@@ -55,10 +56,12 @@ func (app *application) userLogicHandler(r *mux.ServeMux) {
 
 // shortLogicHandler 短网址逻辑相关
 func (app *application) shortLogicHandler(r *mux.ServeMux) {
+	r.GET("/:hash|^[a-zA-Z0-9]+$", app.redirectLinkHandler)
+
 	s := r.RouteGroup("/short")
-	s.POST("/create", app.indexHandler)
-	s.POST("/update", app.indexHandler)
-	s.POST("/delete", app.indexHandler)
-	s.GET("/redirect", app.indexHandler)
-	s.GET("/list", app.indexHandler)
+	s.Use(app.authRequired)
+	s.POST("/create", app.createLinkHandler)
+	s.POST("/update", app.updateLinkHandler)
+	s.POST("/delete", app.deleteLinkHandler)
+	s.GET("/list", app.listLinksHandler)
 }

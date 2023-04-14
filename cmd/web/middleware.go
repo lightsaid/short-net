@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/justinas/nosurf"
@@ -57,6 +58,18 @@ func (app *application) recovererMiddleware(next http.Handler) http.Handler {
 func (app *application) authRequired(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if _, isLogin := app.IsLogin(r); !isLogin {
+
+			contentType := strings.ToLower(r.Header.Get("Content-Type"))
+
+			// 判断请求是否由 fetch 发送
+			if strings.Contains(contentType, "multipart/form-data") || strings.Contains(contentType, "application/json") {
+				resp := make(jsonResponse)
+				resp["error"] = "请先登录"
+				resp["redirect"] = "/sign"
+				app.writeJSON(w, r, http.StatusSeeOther, resp)
+				return
+			}
+
 			app.sessionMgr.Put(r.Context(), "error", "请先登录")
 			http.Redirect(w, r, "/sign", http.StatusSeeOther)
 			return

@@ -8,18 +8,74 @@
 <main class="main">
     <div class="shorturl">
         <h3 class="form-title">Paste the URL to be shortened</h3>
-        <form action="#">
+        <form action="" method="post" id="short_form">
+            <input type="hidden"  name="csrf_token" value="{{.CSRFToken}}" required>
             <div class="form-item flex">
-                <input type="text" name="" long_url>
+                <input type="text" placeholder="Please enter the long URL" name="long_url">
             </div>
             <div class="form-item flex">
-                <input type="text" readonly value="aaa" name="short_url">
-                <button class="copy">Copy</button>
+                <input type="text" readonly value="" name="short_url">
+                <button class="copy" id="copy_short"><i class="iconfont icon-fuzhi copy"></i>&nbsp;&nbsp;Copy</button>
             </div>
             <div class="form-item">
-                <button class="make">Make URL</button>
+                <button class="make" >Make URL</button>
             </div>
         </form>
     </div>
 </main>
+{{end}}
+
+{{define "js"}}
+<script>
+
+const shortForm = document.getElementById("short_form")
+const copyShort = document.getElementById("copy_short")
+
+shortForm.addEventListener("submit", function(event) {
+    event.preventDefault()
+    event.stopPropagation()
+    // 构造一个 form 表单数据
+    let formData = new FormData(shortForm)
+    // 请求
+    fetch("/short/create", {
+        method: "post",
+        body: formData,
+    }).then(response => response.json()).then(data=>{
+        console.log("data: ", data)
+        if (data.status != 200) {
+            window.createToast("error", data.error)
+            let timer = setTimeout(()=> {
+                if(300 <= data.status <400 && data.redirect) {
+                    location.href = data.redirect
+                    return
+                }
+                clearTimeout(timer)
+            }, 3000)
+            return
+        }
+        shortForm.short_url.value = `${window.location.origin}/${data.data.short_hash}`
+    }).catch(err => {
+        var msg = "服务内部错误"
+        // 信息有异常
+        if (err.message && err.message.length > 20) {
+            window.createToast("error", msg)
+        }else{
+            window.createToast("error", err.message || msg)
+        }
+        console.error("createLink: ", err)
+    })
+})
+
+
+copyShort.addEventListener("click", function(event) {
+    event.preventDefault()
+    event.stopPropagation()
+
+    shortForm.short_url.select()
+    document.execCommand("copy")
+
+    window.createToast("success", "已复制到剪贴板")
+})
+
+</script>
 {{end}}
