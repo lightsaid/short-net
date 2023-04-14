@@ -20,4 +20,6 @@ type envConfig struct {
 	TokenSecretKey     string        `mapstruct:"TOKEN_SECRET_KEY"`
 	MaxActivateTime    time.Duration `mapstruct:"MAX_ACTIVATE_TIME"`
 	ShortDefaultExpire time.Duration `mapstruct:"SHORT_DEFAULT_EXPIRE"`
+	RedisAddress       string        `mapstruct:"REDIS_ADDRESS"`
+	SessionLifeTime    time.Duration `mapstruct:"SESSION_LIFETIME"`
 }

@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/alexedwards/scs/v2"
+	"github.com/gomodule/redigo/redis"
 	"github.com/lightsaid/short-net/models"
 	"github.com/lightsaid/short-net/util"
 	"github.com/natefinch/lumberjack"
@@ -134,10 +135,22 @@ func setupSessionMgr(env *envConfig) *scs.SessionManager {
 	}
 
 	sessionMgr := scs.New()
-	sessionMgr.Lifetime = 24 * time.Hour
+	sessionMgr.Lifetime = env.SessionLifeTime
 	sessionMgr.Cookie.Persist = true
 	sessionMgr.Cookie.SameSite = http.SameSiteLaxMode
 	sessionMgr.Cookie.Secure = secure
 
 	return sessionMgr
+}
+
+func setupRedis(env *envConfig, options ...redis.DialOption) *redis.Pool {
+	pool := &redis.Pool{
+		MaxIdle:     10,
+		IdleTimeout: 3 * time.Minute,
+		Dial: func() (redis.Conn, error) {
+			return redis.Dial("tcp", env.RedisAddress, options...)
+		},
+	}
+
+	return pool
 }

@@ -6,7 +6,9 @@ import (
 	"sync"
 	"time"
 
+	"github.com/alexedwards/scs/redisstore"
 	"github.com/alexedwards/scs/v2"
+	"github.com/gomodule/redigo/redis"
 	"github.com/lightsaid/short-net/dbrepo"
 	"github.com/lightsaid/short-net/mailer"
 	"github.com/lightsaid/short-net/models"
@@ -23,6 +25,7 @@ type application struct {
 	tokenMaker    token.Maker
 	wg            sync.WaitGroup
 	mutex         sync.RWMutex
+	redisPool     *redis.Pool
 }
 
 func main() {
@@ -48,6 +51,23 @@ func main() {
 	err = db.AutoMigrate(&models.User{}, &models.Link{})
 	fatalOnError(err, "db.AutoMigrate failed")
 
+	// redis 连接
+	redisPool := setupRedis(&envConf)
+
+	// session 创建
+	sessionMgr := setupSessionMgr(&envConf)
+	// 存储 session
+	sessionMgr.Store = redisstore.New(redisPool)
+
+	// test redis
+	// pool := redisPool.Get()
+	// defer pool.Close()
+	// res, err := pool.Do("SET", "short_version", "v1.0")
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// fmt.Printf(">>>> redis: %v\n", res)
+
 	// 获取link表最后一条记录的short_hash值对应数值，用于生成后续短网址
 	shortID := setupShortID(db)
 
@@ -58,10 +78,11 @@ func main() {
 	var app = application{
 		env:        envConf,
 		shortID:    shortID,
-		sessionMgr: setupSessionMgr(&envConf),
+		sessionMgr: sessionMgr,
 		tokenMaker: tokenMaker,
 		wg:         sync.WaitGroup{},
 		mutex:      sync.RWMutex{},
+		redisPool:  redisPool,
 	}
 
 	app.mailer = mailer.NewMailSender(

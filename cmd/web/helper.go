@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 
 	"github.com/go-sql-driver/mysql"
@@ -32,7 +31,6 @@ func (app *application) execInBackgorund(fn func()) {
 func (app *application) IsLogin(r *http.Request) (uint, bool) {
 	if ok := app.sessionMgr.Exists(r.Context(), authRequiredKey); ok {
 		userID := app.sessionMgr.GetInt(r.Context(), authRequiredKey)
-		fmt.Println(">>>>>>>> ID: ", userID)
 		if userID > 0 {
 			return uint(userID), true
 		}
