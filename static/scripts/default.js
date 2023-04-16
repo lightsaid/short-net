@@ -11,7 +11,10 @@ window.addEventListener("load", function () {
             let offcanvasBody = document.querySelector(".offcanvas-body")
 
             // 代理事件
-            linkBtnPorxy(offcanvasBody)
+            linkBtnProxy(offcanvasBody)
+            avatarUploadProxy(offcanvasBody)
+            updateProfixProxy(offcanvasBody)
+
 
             // 判断点击了哪一个元素
             if (event.target.dataset.tag === "myurls") {
@@ -19,21 +22,54 @@ window.addEventListener("load", function () {
                 // 请求
                 fetchList()
             } else {
-                window.offcanvas.title.innerHTML = "Profile"
-                offcanvasBody.innerHTML = `
-                    <div>
-                        <p>锻炼2</p>    
-                        <p>锻炼2</p>    
-                        <p>锻炼2</p>    
-                        <p>锻炼2</p>    
-                    </div>
-                `
+                window.offcanvas.title.innerHTML = "Update Profile"
+                // 请求
+                fetch("/profile", {
+                    method: "get",
+                }).then(response => response.json()).then(data => {
+                    errorHandler(data)
+                    if (data.status == 200) {
+                        let user = data.data
+                        offcanvasBody.innerHTML = `
+                        <div class="profile">
+                            <form action="#" method="post">
+                                <div class="user_name">
+                                    <input type="text" name="name" value="${user.name}" />
+                                </div>
+                                <div class="user_avatar">
+                                    <input type="file" class="iconfont" name="file"/>  
+                                    <div class="box">
+                                        <img id="user_avatar" src="${user.avatar}" />
+                                    </div>
+                                </div> 
+                                <div class="submit">
+                                    <input type="submit" value="Save">
+                                </div>
+                            </form>
+                        </div>
+                    `
+                    }
+                })
             }
         })
     })
 })
 
-function linkBtnPorxy(offcanvasBody) {
+function errorHandler(data) {
+    if (data.status != 200) {
+        window.createToast("error", data.error)
+        let timer = setTimeout(() => {
+            if (300 <= data.status < 400 && data.redirect) {
+                location.href = data.redirect
+                return
+            }
+            clearTimeout(timer)
+        }, 3000)
+        return
+    }
+}
+
+function linkBtnProxy(offcanvasBody) {
     offcanvasBody.addEventListener("click", function(event) {
         console.log(event.target.dataset.btn)
 
@@ -59,9 +95,7 @@ function linkBtnPorxy(offcanvasBody) {
 
 
 function fetchList() {
-
     let offcanvasBody = document.querySelector(".offcanvas-body")
-
     const { pageIndex, pageSize } = fetchList.pageInfo
 
     let formData = new FormData()
@@ -77,8 +111,12 @@ function fetchList() {
         method: "post",
         body: formData,
     }).then(response => response.json()).then(data => {
+        errorHandler(data)
         let links = data.data
         let html = ""
+        if (links.length === 0) {
+            return
+        }
         links.forEach((link)=>{
             let short_url = `${location.origin}/${link.short_hash}`
             let expired_at =  new Date(link.expired_at).getTime()
@@ -118,20 +156,8 @@ function fetchList() {
             html += `<div class="loading"> <button  data-btn="loading">Loading</button></div>`
         }
         offcanvasBody.innerHTML = html
-
-
-    }).catch(err => {
-        let msg = "服务内部错误"
-        // 信息有异常
-        if (err.message && err.message.length > 20) {
-            window.createToast("error", msg)
-        } else {
-            window.createToast("error", err.message || msg)
-        }
-        console.error("createLink: ", err)
     })
 }
-
 
 function fetchDelete(linkId) {
     let formData = new FormData()
@@ -147,14 +173,35 @@ function fetchDelete(linkId) {
             window.createToast("success", "删除成功")
             fetchList()
         }
-    }).catch(err => {
-        let msg = "服务内部错误"
-        // 信息有异常
-        if (err.message && err.message.length > 20) {
-            window.createToast("error", msg)
-        } else {
-            window.createToast("error", err.message || msg)
-        }
-        console.error("createLink: ", err)
+        errorHandler(data)
+    })
+}
+
+function avatarUploadProxy(offcanvasBody) {
+    offcanvasBody.addEventListener("change", function(event) {
+        const file = event.target.files[0]
+        let url = URL.createObjectURL(file)
+        document.getElementById("user_avatar").src = url
+    })
+}
+
+function updateProfixProxy(offcanvasBody) {
+    offcanvasBody.addEventListener("submit", function(event) {
+        event.preventDefault()
+        event.stopPropagation()
+
+        let formData = new FormData(event.target)
+        let tokenInput = document.getElementById("fetch_csrf_token")
+        formData.append("csrf_token", tokenInput.value)
+
+        fetch("/profile", {
+            method: "post",
+            body: formData,
+        }).then(response => response.json()).then(data => {
+            errorHandler(data)
+            if (data.status == 200) {
+                window.createToast("success", "更新成功")
+            }
+        })
     })
 }

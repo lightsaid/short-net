@@ -133,7 +133,6 @@ func setupSessionMgr(env *envConfig) *scs.SessionManager {
 	if env.RunMode == "prod" {
 		secure = true
 	}
-
 	sessionMgr := scs.New()
 	sessionMgr.Lifetime = env.SessionLifeTime
 	sessionMgr.Cookie.Persist = true

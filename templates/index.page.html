@@ -49,7 +49,6 @@
             method: "post",
             body: formData,
         }).then(response => response.json()).then(data => {
-            console.log("data: ", data)
             if (data.status != 200) {
                 window.createToast("error", data.error)
                 let timer = setTimeout(() => {

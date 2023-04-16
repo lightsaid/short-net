@@ -29,6 +29,9 @@ func (r *repository) UpdateLinkByID(id uint, link models.Link) error {
 	if link.LongURL != "" {
 		q.LongURL = link.LongURL
 	}
+	if link.Click != q.Click {
+		q.Click = link.Click
+	}
 	return r.DB.Save(&q).Error
 }
 func (r *repository) DeleteLinkByID(id uint) error {

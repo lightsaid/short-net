@@ -50,8 +50,9 @@ func (app *application) userLogicHandler(r *mux.ServeMux) {
 	// TODO:
 	m.POST("/forgot", app.indexHandler)
 	m.POST("/reset", app.indexHandler)
-	m.POST("/profile", app.indexHandler)
-	m.PUT("/profile", app.indexHandler)
+
+	m.GET("/profile", app.getUserHandler).Use(app.authRequired)
+	m.POST("/profile", app.updateProfileHandler).Use(app.authRequired)
 }
 
 // shortLogicHandler 短网址逻辑相关
@@ -61,7 +62,6 @@ func (app *application) shortLogicHandler(r *mux.ServeMux) {
 	s := r.RouteGroup("/short")
 	s.Use(app.authRequired)
 	s.POST("/create", app.createLinkHandler)
-	s.POST("/update", app.updateLinkHandler)
 	s.POST("/delete", app.deleteLinkHandler)
 	s.POST("/list", app.listLinksHandler)
 }

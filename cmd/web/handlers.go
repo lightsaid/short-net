@@ -321,6 +321,98 @@ func (app *application) resetHandler(w http.ResponseWriter, r *http.Request) {
 	app.renderTemplate(w, r, "reset.page.html", nil)
 }
 
+func (app *application) getUserHandler(w http.ResponseWriter, r *http.Request) {
+	rsp := make(jsonResponse)
+
+	userID, isLogin := app.IsLogin(r)
+	if !isLogin || userID <= 0 {
+		rsp["error"] = "请先登录"
+		app.writeJSON(w, r, http.StatusBadRequest, rsp)
+		return
+	}
+
+	user, err := app.store.GetUserByID(userID)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			rsp["info"] = "用户不存在"
+			rsp["redirect"] = "/sign"
+			app.sessionMgr.Destroy(r.Context())
+			app.writeJSON(w, r, http.StatusSeeOther, rsp)
+			return
+		}
+		rsp["error"] = "服务内部错"
+		app.writeJSON(w, r, http.StatusInternalServerError, rsp)
+		return
+	}
+
+	rsp["data"] = user
+
+	app.writeJSON(w, r, http.StatusOK, rsp)
+}
+
+func (app *application) updateProfileHandler(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+	f := form.New(r.PostForm)
+	f.Required("name")
+	f.MinLength("name", 2, "用户名长度必须大于或等于2")
+	f.MaxLength("name", 24, "用户名长度必须小于或等于24")
+
+	rsp := make(jsonResponse)
+
+	// 验证不通过
+	if !f.Valid() {
+		rsp["error"] = f.Errors.Get("name")
+		app.writeJSON(w, r, http.StatusBadRequest, rsp)
+		return
+	}
+
+	userID, isLogin := app.IsLogin(r)
+	if !isLogin || userID <= 0 {
+		rsp["error"] = "请先登录"
+		rsp["status"] = http.StatusSeeOther
+		app.writeJSON(w, r, http.StatusBadRequest, rsp)
+		return
+	}
+
+	// 查询用户
+	user, err := app.store.GetUserByID(userID)
+	if err != nil {
+		rsp["error"] = "查询用户失败"
+		app.writeJSON(w, r, http.StatusBadRequest, rsp)
+		return
+	}
+
+	filename, err := app.formUpload(w, r)
+	if err != nil && !errors.Is(err, http.ErrMissingFile) {
+		slog.Error("upload error: "+err.Error(), "userid", userID, "name", f.Get("name"))
+		rsp["error"] = "上传错误"
+		app.writeJSON(w, r, http.StatusBadRequest, rsp)
+		return
+	}
+
+	slog.Info("upload success", "filename", filename)
+
+	if user.Avatar != filename {
+		user.Avatar = filename
+	}
+	if user.Name != f.Get("name") {
+		user.Name = f.Get("name")
+	}
+
+	err = app.store.UpdateUserByID(userID, user)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			rsp["error"] = "服务内部错误"
+		} else {
+			rsp["error"] = "服务内部错误"
+		}
+		app.writeJSON(w, r, http.StatusBadRequest, rsp)
+		return
+	}
+	rsp["data"] = user
+	app.writeJSON(w, r, http.StatusOK, rsp)
+}
+
 // ================================ 以下是 Link Table Handler ==============================================
 
 // createLinkHandler 创建 link 返回 json
@@ -377,6 +469,13 @@ func (app *application) redirectLinkHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 	if time.Now().Before(link.ExpiredAt) {
+		link.Click++
+		go func() {
+			err := app.store.UpdateLinkByID(link.ID, link)
+			if err != nil {
+				slog.Error("update click: "+err.Error(), "link_id", link.ID)
+			}
+		}()
 		http.Redirect(w, r, link.LongURL, http.StatusSeeOther)
 	} else {
 		w.WriteHeader(http.StatusNotFound)
@@ -416,10 +515,6 @@ func (app *application) listLinksHandler(w http.ResponseWriter, r *http.Request)
 
 	rsp["data"] = links
 	app.writeJSON(w, r, http.StatusOK, rsp)
-}
-
-func (app *application) updateLinkHandler(w http.ResponseWriter, r *http.Request) {
-
 }
 
 func (app *application) deleteLinkHandler(w http.ResponseWriter, r *http.Request) {
