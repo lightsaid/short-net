@@ -5,12 +5,14 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/go-sql-driver/mysql"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/lightsaid/gotk/form"
 	"github.com/lightsaid/gotk/mux"
+	"github.com/lightsaid/short-net/dbrepo"
 	"github.com/lightsaid/short-net/models"
 	"github.com/lightsaid/short-net/util"
 	"golang.org/x/exp/slog"
@@ -366,14 +368,6 @@ func (app *application) createLinkHandler(w http.ResponseWriter, r *http.Request
 	app.writeJSON(w, r, http.StatusOK, rsp)
 }
 
-func (app *application) updateLinkHandler(w http.ResponseWriter, r *http.Request) {
-
-}
-
-func (app *application) deleteLinkHandler(w http.ResponseWriter, r *http.Request) {
-
-}
-
 func (app *application) redirectLinkHandler(w http.ResponseWriter, r *http.Request) {
 	hash := mux.Param(r, "hash")
 	link, err := app.store.GetLinkByHash(hash)
@@ -382,9 +376,81 @@ func (app *application) redirectLinkHandler(w http.ResponseWriter, r *http.Reque
 		r.Context().Done()
 		return
 	}
-	http.Redirect(w, r, link.LongURL, http.StatusSeeOther)
+	if time.Now().Before(link.ExpiredAt) {
+		http.Redirect(w, r, link.LongURL, http.StatusSeeOther)
+	} else {
+		w.WriteHeader(http.StatusNotFound)
+		r.Context().Done()
+		return
+	}
 }
 
 func (app *application) listLinksHandler(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+	rsp := make(jsonResponse)
+	userID, isLogin := app.IsLogin(r)
+	if !isLogin || userID <= 0 {
+		rsp["error"] = "请先登录"
+		app.writeJSON(w, r, http.StatusBadRequest, rsp)
+		return
+	}
 
+	f := form.New(r.PostForm)
+	page, _ := strconv.Atoi(f.Get("page"))
+	size, _ := strconv.Atoi(f.Get("size"))
+
+	if page <= 0 {
+		page = 1
+	}
+
+	if size <= 0 {
+		size = 100
+	}
+
+	links, err := app.store.ListLinksByUserID(userID, dbrepo.Filters{Page: page, Size: size})
+	if err != nil {
+		rsp["error"] = "服务内部错"
+		app.writeJSON(w, r, http.StatusInternalServerError, rsp)
+		return
+	}
+
+	rsp["data"] = links
+	app.writeJSON(w, r, http.StatusOK, rsp)
+}
+
+func (app *application) updateLinkHandler(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func (app *application) deleteLinkHandler(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+	rsp := make(jsonResponse)
+	userID, isLogin := app.IsLogin(r)
+	if !isLogin || userID <= 0 {
+		rsp["error"] = "请先登录"
+		app.writeJSON(w, r, http.StatusBadRequest, rsp)
+		return
+	}
+
+	f := form.New(r.PostForm)
+	linkID, _ := strconv.Atoi(f.Get("link_id"))
+	if linkID <= 0 {
+		rsp["error"] = "id 无效"
+		app.writeJSON(w, r, http.StatusBadRequest, rsp)
+		return
+	}
+
+	err := app.store.DeleteLinkByID(uint(linkID))
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			rsp["info"] = "记录不存在"
+			app.writeJSON(w, r, http.StatusNotFound, rsp)
+			return
+		}
+		rsp["error"] = "服务内部错"
+		app.writeJSON(w, r, http.StatusInternalServerError, rsp)
+		return
+	}
+
+	app.writeJSON(w, r, http.StatusOK, rsp)
 }

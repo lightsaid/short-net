@@ -1,7 +1,7 @@
 ~function (window) {
     const notifications = document.querySelector(".notifications");
     const toastDetails = {
-        timer: 5000,
+        timer: 3000,
         success: {
             icon: 'fa-circle-check',
         },

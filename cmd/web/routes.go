@@ -63,5 +63,5 @@ func (app *application) shortLogicHandler(r *mux.ServeMux) {
 	s.POST("/create", app.createLinkHandler)
 	s.POST("/update", app.updateLinkHandler)
 	s.POST("/delete", app.deleteLinkHandler)
-	s.GET("/list", app.listLinksHandler)
+	s.POST("/list", app.listLinksHandler)
 }
