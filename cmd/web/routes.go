@@ -11,7 +11,7 @@ func (app *application) setupRoute() *mux.ServeMux {
 	// 否则会各种 panic
 	r.Use(app.loadSessionAndSave)
 	r.Use(app.csrfMiddleware)
-	r.Use(app.recovererMiddleware)
+	// r.Use(app.recovererMiddleware)
 	r.Use(app.loggerMiddleware)
 
 	app.showpages(r)

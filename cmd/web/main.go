@@ -99,7 +99,9 @@ func main() {
 	gob.Register(renderData{})
 	gob.Register(models.User{})
 
-	app.genTemplateCache()
+	// 加载模板
+	err = app.genTemplateCache()
+	fatalOnError(err, "genTemplateCache failed")
 
 	err = app.serve()
 	fatalOnError(err, "app.serve failed")

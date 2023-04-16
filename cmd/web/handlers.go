@@ -326,22 +326,23 @@ func (app *application) createLinkHandler(w http.ResponseWriter, r *http.Request
 	app.mutex.Lock()
 	defer app.mutex.Unlock()
 
+	rsp := make(jsonResponse)
+
 	// 解析表单并验证
 	r.ParseForm()
 	f := form.New(r.PostForm)
 	f.Required("long_url")
 	if !f.Valid() {
-		app.sessionMgr.Put(r.Context(), "error", "请输入长网址")
-		http.Redirect(w, r, "/", http.StatusSeeOther)
+		rsp["error"] = "请输入长网址"
+		app.writeJSON(w, r, http.StatusBadRequest, rsp)
 		return
 	}
-	rsp := make(jsonResponse)
 
 	app.shortID++
 	shortHashed := util.EncodeBase62(app.shortID)
 	userID, isLogin := app.IsLogin(r)
 	if !isLogin || userID <= 0 {
-		app.sessionMgr.Put(r.Context(), "info", "请先登录")
+		rsp["error"] = "请先登录"
 		app.writeJSON(w, r, http.StatusBadRequest, rsp)
 		return
 	}

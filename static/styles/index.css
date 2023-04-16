@@ -1,6 +1,6 @@
 /* Main */
 
-.shorturl{
+.shorturl {
     width: 600px;
     min-height: 350px;
     margin: 130px auto;
@@ -20,7 +20,7 @@
     margin-top: 35px;
 }
 
-.shorturl .form-item input{
+.shorturl .form-item input {
     width: 78%;
     height: 50px;
     padding: 10px 16px;
@@ -34,16 +34,16 @@
     border-right: 1px solid #bbb;
 }
 
-.shorturl .form-item:nth-child(2) input{
+.shorturl .form-item:nth-child(2) input {
     width: 100%;
 }
 
-.shorturl .form-item:nth-child(3) input{
+.shorturl .form-item:nth-child(3) input {
     border-bottom-right-radius: 0;
     border-top-right-radius: 0;
 }
 
-.shorturl .form-item:nth-child(1) input:focus{
+.shorturl .form-item:nth-child(1) input:focus {
     border: 2px solid #3da0da !important;
 }
 
@@ -66,20 +66,21 @@
     font-weight: 500;
 }
 
-.shorturl .form-item button:hover{
+.shorturl .form-item button:hover {
     opacity: .8;
     letter-spacing: 1px;
 }
 
-.shorturl .form-item button.copy{
+.shorturl .form-item button.copy {
     flex: 1;
 }
 
-.shorturl .form-item button.make{
+.shorturl .form-item button.make {
     width: 100%;
     border-radius: 3px;
 }
 
-.shorturl .copy{
+.shorturl .copy {
     font-size: 18px;
 }
+

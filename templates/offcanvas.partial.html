@@ -1,0 +1,112 @@
+{{define "offcanvas"}}
+
+<style>
+    .offcanvas {
+        position: fixed;
+        top: 0;
+        right: 0;
+        z-index: 9;
+        min-width: 450px;
+        height: 100vh;
+        transform: translateX(100%);
+        background-color: #fff;
+        transition: transform .2s linear;
+    }
+
+    .offcanvas.show {
+        transform: translateX(0);
+    }
+
+    .offcanvas-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 7;
+        width: 100vw;
+        height: 100vh;
+        background-color: #000;
+        opacity: 0;
+        display: none;
+        transition: opacity .2s linear;
+    }
+
+    .offcanvas-backdrop.show {
+        display: block;
+        transition: opacity .2s linear;
+    }
+
+    .offcanvas-header {
+        justify-content: end;
+        padding: 0.5em;
+        border-bottom: 1px solid #dcd2d2;
+      
+    }
+
+    .offcanvas-close{
+        background-color: transparent;
+        outline: none;
+        font-size: 24px;
+        color: #989898;
+        border: transparent;
+    }
+</style>
+
+<div class="offcanvas">
+    <div class="offcanvas-header flex">
+        <button class="offcanvas-close"> <span class="offcanvas-close iconfont icon-shanchu"></span> </button>
+    </div>
+    <div class="offcanvas-body">
+
+        <!-- 内容 -->
+        {{block "offcanvas-body" .}}
+
+        {{end}}
+
+    </div>
+</div>
+<div class="offcanvas-backdrop fade"></div>
+
+
+<script>
+    const offcanvas = document.querySelector(".offcanvas")
+    const offcanvasBackdrop = document.querySelector(".offcanvas-backdrop")
+    const offcanvasClose = document.querySelector(".offcanvas-close")
+
+    const openBtns = document.querySelectorAll(".open-offcanvas")
+
+    openBtns.forEach((btn) => {
+        btn.addEventListener("click", function () {
+            // 先 display
+            offcanvasBackdrop.classList.add("show");
+
+            // 后 opacity
+            let timer = setTimeout(() => {
+                offcanvasBackdrop.style.opacity = '0.5';
+                clearTimeout(timer)
+            }, 0)
+            offcanvas.classList.add("show")
+        });
+    })
+
+    offcanvasClose.addEventListener("click", function () {
+        // 先 opacity
+        offcanvasBackdrop.style.opacity = '0';
+
+        // 后 display
+        let timer = setTimeout(() => {
+            offcanvasBackdrop.classList.remove("show")
+            clearTimeout(timer)
+        }, 200)
+
+        offcanvas.classList.remove("show")
+    })
+
+    // 导出挂全局
+    window.offcanvas = {
+        offcanvasClose: offcanvasClose,
+        openBtns: openBtns,
+    }
+
+</script>
+
+{{end}}
