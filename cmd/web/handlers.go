@@ -384,7 +384,7 @@ func (app *application) updateProfileHandler(w http.ResponseWriter, r *http.Requ
 
 	filename, err := app.formUpload(w, r)
 	if err != nil && !errors.Is(err, http.ErrMissingFile) {
-		slog.Error("upload error: "+err.Error(), "userid", userID, "name", f.Get("name"))
+		slog.Error("update profile upload error: "+err.Error(), "userid", userID, "name", f.Get("name"))
 		rsp["error"] = "上传错误"
 		app.writeJSON(w, r, http.StatusBadRequest, rsp)
 		return

@@ -1,0 +1,26 @@
+{{template "default" .}}
+
+{{define "css"}}
+
+<link rel="stylesheet" href="/static/styles/book.css">
+
+{{end}}
+
+{{define "main"}}
+{{$books := index .Data "books" }}
+<main class="books-main">
+    <ul class="grid book-list">
+        {{range $books}}
+            <li class="book-item">
+                <div class="poster"><img src="{{.Picture}}" alt="book"></div>
+                <div class="title">{{.Title}}</div>
+                <div class="footer flex">
+                    <span class="price">¥ {{.Price}}</span>
+                    <button class="buying"><a href="/book/buy/{{.ID}}">立即抢购</a></button>
+                </div>
+            </li>
+        {{end}}
+    </ul>
+</div>
+
+{{end}}

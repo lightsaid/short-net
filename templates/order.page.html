@@ -1,0 +1,33 @@
+{{template "default" .}}
+
+{{define "css"}}
+
+<link rel="stylesheet" href="/static/styles/order.css">
+
+{{end}}
+
+{{define "main"}}
+    
+<main class="books-main">
+    <ul class="grid book-list">
+        <li class="flex book-item">
+            <div class="poster"><img src="/static//images/avatar1.png" alt="book"></div>
+            <div class="right">
+                <div class="title">Go 从入门到放弃</div>
+                <p class="price">¥ 10</p>
+                <p class="num">x 3</p>
+            </div>
+        </li>
+
+        <li class="flex book-item">
+            <div class="poster"><img src="/static//images/avatar1.png" alt="book"></div>
+            <div class="right">
+                <div class="title">Go 从入门到放弃</div>
+                <p class="price">¥ 10</p>
+                <p class="num">x 3</p>
+            </div>
+        </li>
+    </ul>
+</div>
+
+{{end}}

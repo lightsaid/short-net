@@ -11,13 +11,15 @@ func (app *application) setupRoute() *mux.ServeMux {
 	// 否则会各种 panic
 	r.Use(app.loadSessionAndSave)
 	r.Use(app.csrfMiddleware)
-	// r.Use(app.recovererMiddleware)
+	r.Use(app.recovererMiddleware)
 	r.Use(app.loggerMiddleware)
 
 	app.showpages(r)
 	app.signLogicHandler(r)
 	app.userLogicHandler(r)
 	app.shortLogicHandler(r)
+
+	app.bookHandler(r)
 
 	// 静态资源
 	r.Static("/static/", "./static")
@@ -35,6 +37,10 @@ func (app *application) showpages(r *mux.ServeMux) {
 	r.GET("/servererror", app.serverErrorHandler)
 	r.GET("/success", app.operateSuccessfully)
 	r.GET("/error", app.errorHandler)
+
+	r.GET("/book/index", app.showBookHandler)
+	r.GET("/book/create", app.showCreateBookHandler).Use(app.authRequired)
+	r.GET("/order/index", app.showOrderHandler).Use(app.authRequired)
 }
 
 // 登录注册逻辑
@@ -64,4 +70,13 @@ func (app *application) shortLogicHandler(r *mux.ServeMux) {
 	s.POST("/create", app.createLinkHandler)
 	s.POST("/delete", app.deleteLinkHandler)
 	s.POST("/list", app.listLinksHandler)
+}
+
+func (app *application) bookHandler(r *mux.ServeMux) {
+	m := r.RouteGroup("/book")
+	m.Use(app.authRequired)
+
+	m.POST("/create", app.createBookHandler)
+	// 购买
+	m.GET("/buy/:id|^[0-9]+$", app.buyBookHandler)
 }

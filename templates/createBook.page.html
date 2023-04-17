@@ -1,0 +1,59 @@
+{{template "default" .}}
+
+{{define "css"}}
+
+<link rel="stylesheet" href="/static/styles/createBook.css">
+
+{{end}}
+
+{{define "main"}}
+<main class="main">
+    <div class="forgot-container">
+        <div class="forms">
+            <div class="form login">
+                <span class="title">Create Book</span>
+                <form action="/book/create" method="post" enctype="multipart/form-data">
+                    <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+                    <div class="input-field  {{with .Form.Errors.Get "title"}}error{{end}}">
+                        <input type="text" placeholder="Enter your title" name="title" 
+                        value='{{with .Form.Get "title"}}{{.}}{{end}}' >
+                        <i class="icon iconfont icon-youxiang"></i>
+                    </div>
+                    {{with .Form.Errors.Get "title"}}
+                        <p class="error-msg">{{.}}</p>
+                    {{end}}
+
+                    <div class="input-field  {{with .Form.Errors.Get "price"}}error{{end}}">
+                        <input type="number" placeholder="Enter your price" name="price" 
+                        value='{{with .Form.Get "price"}}{{.}}{{end}}' >
+                        <i class="icon iconfont icon-youxiang"></i>
+                    </div>
+                    {{with .Form.Errors.Get "price"}}
+                        <p class="error-msg">{{.}}</p>
+                    {{end}}
+
+                    <div class="input-field  {{with .Form.Errors.Get "stock"}}error{{end}}">
+                        <input type="number" placeholder="Enter your stock" name="stock" 
+                        value='{{with .Form.Get "stock"}}{{.}}{{end}}' >
+                        <i class="icon iconfont icon-youxiang"></i>
+                    </div>
+                    {{with .Form.Errors.Get "stock"}}
+                        <p class="error-msg">{{.}}</p>
+                    {{end}}
+
+                    <div class="input-field">
+                        <input type="file" name="file">
+                    </div>
+                    {{with .Form.Errors.Get "file"}}
+                        <p class="error-msg">{{.}}</p>
+                    {{end}}
+
+                    <div class="input-field button">
+                        <input type="submit" value="Create Book">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</main>
+{{end}}

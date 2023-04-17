@@ -21,8 +21,9 @@ type renderData struct {
 	Warning   string            // 警告通知
 	Info      string            // 普通通知
 	StringMap map[string]string // string map
-	CSRFToken string            // csrf token
-	IsLogin   int               // 是否已经登录
+	Data      map[string]any
+	CSRFToken string // csrf token
+	IsLogin   int    // 是否已经登录
 }
 
 func (app *application) newRenderData() *renderData {
@@ -80,7 +81,7 @@ func (app *application) addDefaultData(r *http.Request, data *renderData) *rende
 
 	data.Error = app.sessionMgr.PopString(r.Context(), "error")
 	data.Flash = app.sessionMgr.PopString(r.Context(), "flash")
-	data.Warning = app.sessionMgr.PopString(r.Context(), "flash")
+	data.Warning = app.sessionMgr.PopString(r.Context(), "warning")
 	data.Info = app.sessionMgr.PopString(r.Context(), "info")
 
 	// 是否登录

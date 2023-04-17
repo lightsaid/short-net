@@ -48,7 +48,7 @@ func main() {
 	defer conn.Close()
 
 	// 执行迁移
-	err = db.AutoMigrate(&models.User{}, &models.Link{})
+	err = db.AutoMigrate(&models.User{}, &models.Link{}, &models.Book{}, &models.Order{}, &models.OrderDetail{})
 	fatalOnError(err, "db.AutoMigrate failed")
 
 	// redis 连接

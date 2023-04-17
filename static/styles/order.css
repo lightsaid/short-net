@@ -1,0 +1,46 @@
+.books-main{
+    padding: 60px;
+    max-width: 1024px;
+    margin: 0 auto;
+}
+
+.books-main .book-item{
+    background: #fff;
+    padding:  16px;
+    border-radius: 5px;
+    margin-bottom: 16px;
+}
+
+.books-main .poster{
+    border: 1px solid #f5f5f5;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.books-main .poster img {
+    display: block;
+    width: 100px;
+    margin: 0 auto;
+    border-radius: 3px;
+    object-fit: cover;
+}
+
+.books-main .footer{
+    justify-content: space-between;
+}
+
+
+.book-item .title{
+    font-size: 16px;
+    color: var(--theme);
+    padding: 5px 0;
+}
+
+
+.book-item .price {
+    color: var(--error);
+}
+
+.book-item .right {
+    margin-left: 32px;
+}

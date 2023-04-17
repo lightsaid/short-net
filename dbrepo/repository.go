@@ -29,6 +29,13 @@ type Repository interface {
 	// 注册事物，user 是用户对象，cb 函数告知事物已经执行创建用户这一步，但并没有真正提及事物,
 	// 等待发送邮件成功后再提交事物，因此可以在 callback 函数里根据错误信息提前做出响应
 	// TxRegister(user *models.User, cb func(err error)) error
+
+	CreateBook(book *models.Book) error
+	ListBooks(f Filters) ([]*models.Book, error)
+	DeductionStock(id uint, qty uint) error
+	CreateOrder(order *models.Order) error
+	ListOrders(uid uint, f Filters) ([]*models.Order, error)
+	CreateOrderDetail(detail *models.OrderDetail) error
 }
 
 type repository struct {

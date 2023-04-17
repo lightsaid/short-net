@@ -30,6 +30,9 @@
             <div class="navbar">
                 {{if eq .IsLogin 1}}
                 <ul class="flex items-center">
+                    <li><a href="/book/index">Books</a></li>
+                    <li><a href="/book/create">New Books</a></li>
+                    <li><a href="/order/index">Orders</a></li>
                     <li class="open-offcanvas" data-tag="myurls"><a data-tag="myurls" href="#">MyURLs</a></li>
                     <li class="open-offcanvas">
                         <div class="userinfo flex items-center">
@@ -44,6 +47,7 @@
                 </ul>
                 {{else}}
                 <ul class="flex items-center sign-btns">
+                    <li><a href="/book/index">Books</a></li>
                     <li>
                         <a href="/sign" class="flex items-center">
                             <i class="iconfont icon-dengluyonghuming" style="font-size: 19px;"></i>
