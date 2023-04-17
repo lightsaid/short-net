@@ -12,6 +12,12 @@ func (r *repository) CreateBook(book *models.Book) error {
 	return r.DB.Create(book).Error
 }
 
+func (r *repository) GetBook(id uint) (models.Book, error) {
+	var book models.Book
+	err := r.DB.First(&book, id).Error
+	return book, err
+}
+
 func (r *repository) ListBooks(f Filters) ([]*models.Book, error) {
 	books := make([]*models.Book, 0, f.Limit())
 	err := r.DB.Limit(f.Limit()).Offset(f.Offset()).Find(&books).Error

@@ -6,9 +6,11 @@ import (
 	"strconv"
 
 	"github.com/lightsaid/gotk/form"
+	"github.com/lightsaid/gotk/mux"
 	"github.com/lightsaid/short-net/dbrepo"
 	"github.com/lightsaid/short-net/models"
 	"golang.org/x/exp/slog"
+	"gorm.io/gorm"
 )
 
 func (app *application) showBookHandler(w http.ResponseWriter, r *http.Request) {
@@ -111,5 +113,48 @@ func (app *application) createBookHandler(w http.ResponseWriter, r *http.Request
 }
 
 func (app *application) buyBookHandler(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(mux.Param(r, "id"))
+	if err != nil {
+		app.sessionMgr.Put(r.Context(), "error", "发生异常, Id 不合法")
+		http.Redirect(w, r, "/book/index", http.StatusSeeOther)
+		return
+	}
 
+	userID, ok := app.IsLogin(r)
+	if !ok || userID <= 0 {
+		app.sessionMgr.Put(r.Context(), "error", "请先登录")
+		http.Redirect(w, r, "/sign", http.StatusSeeOther)
+		return
+	}
+
+	book, err := app.store.GetBook(uint(id))
+	if err != nil {
+		slog.Error("buy book error: "+err.Error(), "userId", userID, "bookid", book.ID)
+		var msg = "服务错误"
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			msg = "book 不存在"
+		}
+		app.sessionMgr.Put(r.Context(), "error", msg)
+		http.Redirect(w, r, "/book/index", http.StatusSeeOther)
+		return
+	}
+
+	// NOTE: 目前一次仅仅对一本书下单
+	order := models.Order{
+		UserID:      userID,
+		TotalAmount: book.Price,
+		OrderDetails: []models.OrderDetail{
+			{Qty: 1, Amount: book.Price, BookID: book.ID},
+		},
+	}
+	// TODO: 扣减库存
+	err = app.store.CreateOrder(&order)
+	if err != nil {
+		slog.Error("buy book CreateOrder error: "+err.Error(), "userId", userID, "bookid", book.ID)
+		app.sessionMgr.Put(r.Context(), "error", "抢够失败")
+		http.Redirect(w, r, "/book/index", http.StatusSeeOther)
+		return
+	}
+	app.sessionMgr.Put(r.Context(), "flash", "抢够成功")
+	http.Redirect(w, r, "/book/index", http.StatusSeeOther)
 }

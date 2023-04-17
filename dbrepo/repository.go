@@ -31,6 +31,7 @@ type Repository interface {
 	// TxRegister(user *models.User, cb func(err error)) error
 
 	CreateBook(book *models.Book) error
+	GetBook(id uint) (models.Book, error)
 	ListBooks(f Filters) ([]*models.Book, error)
 	DeductionStock(id uint, qty uint) error
 	CreateOrder(order *models.Order) error
