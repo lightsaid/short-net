@@ -95,7 +95,7 @@ func (app *application) createBookHandler(w http.ResponseWriter, r *http.Request
 	book := models.Book{
 		Title:   title,
 		Price:   uint(price),
-		Stcok:   uint(stock),
+		Stock:   uint(stock),
 		Picture: filename,
 	}
 
@@ -127,34 +127,21 @@ func (app *application) buyBookHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	book, err := app.store.GetBook(uint(id))
+	err = app.store.TxUserBuyBook(userID, uint(id))
 	if err != nil {
-		slog.Error("buy book error: "+err.Error(), "userId", userID, "bookid", book.ID)
+		slog.Error("TxUserBuyBook error: "+err.Error(), "userId", userID, "bookid", uint(id))
 		var msg = "服务错误"
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			msg = "book 不存在"
+		}
+		if errors.Is(err, dbrepo.ErrUnderstock) {
+			msg = "已抢光啦～"
 		}
 		app.sessionMgr.Put(r.Context(), "error", msg)
 		http.Redirect(w, r, "/book/index", http.StatusSeeOther)
 		return
 	}
 
-	// NOTE: 目前一次仅仅对一本书下单
-	order := models.Order{
-		UserID:      userID,
-		TotalAmount: book.Price,
-		OrderDetails: []models.OrderDetail{
-			{Qty: 1, Amount: book.Price, BookID: book.ID},
-		},
-	}
-	// TODO: 扣减库存
-	err = app.store.CreateOrder(&order)
-	if err != nil {
-		slog.Error("buy book CreateOrder error: "+err.Error(), "userId", userID, "bookid", book.ID)
-		app.sessionMgr.Put(r.Context(), "error", "抢够失败")
-		http.Redirect(w, r, "/book/index", http.StatusSeeOther)
-		return
-	}
 	app.sessionMgr.Put(r.Context(), "flash", "抢够成功")
 	http.Redirect(w, r, "/book/index", http.StatusSeeOther)
 }

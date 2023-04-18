@@ -37,6 +37,8 @@ type Repository interface {
 	CreateOrder(order *models.Order) error
 	ListOrders(uid uint, f Filters) ([]*models.Order, error)
 	CreateOrderDetail(detail *models.OrderDetail) error
+	GetBookWithLock(id uint) (models.Book, error)
+	TxUserBuyBook(userID uint, bookID uint) error
 }
 
 type repository struct {
@@ -50,7 +52,7 @@ func NewRepository(db *gorm.DB) Repository {
 }
 
 // execTx 定义一个公共执行事务函数
-func (r *repository) execTx(fn func(Repository) error) error {
+func (r *repository) execTx(fn func(tx Repository) error) error {
 	tx := r.DB.Begin()
 	repo := NewRepository(tx)
 
