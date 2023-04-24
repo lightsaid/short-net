@@ -272,6 +272,14 @@ func (app *application) loginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	err = app.redis.SetUserCache(user)
+	if err != nil {
+		slog.Error("login failed, redis set error", "err", err.Error(), "userid", user.ID)
+		app.sessionMgr.Put(r.Context(), "error", "服务内部错误")
+		http.Redirect(w, r, "/sign", http.StatusSeeOther)
+		return
+	}
+
 	// NOTE: 这里 github.com/alexedwards/scs/v2 有个bug，存 uint、int64  数据会丢失
 	// fmt.Println(">>>>> user.ID: ", user.ID)
 	app.sessionMgr.Put(r.Context(), authRequiredKey, int(user.ID))
@@ -281,6 +289,12 @@ func (app *application) loginHandler(w http.ResponseWriter, r *http.Request) {
 	app.sessionMgr.Put(r.Context(), "flash", "登录成功")
 
 	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
+func (app *application) logoutHandler(w http.ResponseWriter, r *http.Request) {
+	app.sessionMgr.Destroy(r.Context())
+	app.sessionMgr.RenewToken(r.Context())
+	http.Redirect(w, r, "/sign", http.StatusSeeOther)
 }
 
 func (app *application) notFoundHandler(w http.ResponseWriter, r *http.Request) {

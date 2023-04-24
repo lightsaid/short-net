@@ -9,6 +9,7 @@ import (
 
 	"github.com/justinas/nosurf"
 	"github.com/lightsaid/gotk/form"
+	"github.com/lightsaid/short-net/models"
 
 	"golang.org/x/exp/slog"
 )
@@ -83,6 +84,14 @@ func (app *application) addDefaultData(r *http.Request, data *renderData) *rende
 	data.Flash = app.sessionMgr.PopString(r.Context(), "flash")
 	data.Warning = app.sessionMgr.PopString(r.Context(), "warning")
 	data.Info = app.sessionMgr.PopString(r.Context(), "info")
+
+	userInfo, ok := app.sessionMgr.Get(r.Context(), UserInfoKey).(models.User)
+	if ok && userInfo.ID > 0 {
+		if data.Data == nil {
+			data.Data = make(map[string]any)
+		}
+		data.Data["userInfo"] = userInfo
+	}
 
 	// 是否登录
 	if _, ok := app.IsLogin(r); ok {

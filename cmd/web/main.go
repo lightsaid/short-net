@@ -12,6 +12,7 @@ import (
 	"github.com/lightsaid/short-net/dbrepo"
 	"github.com/lightsaid/short-net/mailer"
 	"github.com/lightsaid/short-net/models"
+	"github.com/lightsaid/short-net/redisrepo"
 	"github.com/lightsaid/short-net/token"
 )
 
@@ -19,6 +20,7 @@ type application struct {
 	env           envConfig
 	shortID       uint
 	store         dbrepo.Repository
+	redis         redisrepo.RedisRepository
 	templateCache map[string]*template.Template
 	sessionMgr    *scs.SessionManager
 	mailer        mailer.Mailer
@@ -83,6 +85,7 @@ func main() {
 		wg:         sync.WaitGroup{},
 		mutex:      sync.RWMutex{},
 		redisPool:  redisPool,
+		redis:      redisrepo.NewRedisRepository(redisPool),
 	}
 
 	app.mailer = mailer.NewMailSender(

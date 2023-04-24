@@ -1,13 +1,19 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"strings"
 	"time"
 
 	"github.com/justinas/nosurf"
+	"github.com/lightsaid/short-net/redisrepo"
 	"golang.org/x/exp/slog"
+)
+
+var (
+	UserInfoKey = "user_info"
 )
 
 func (app *application) loadSessionAndSave(next http.Handler) http.Handler {
@@ -18,7 +24,9 @@ func (app *application) loggerMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		t := time.Now()
 		next.ServeHTTP(w, r)
-		log.Printf("%s %s %s \n", r.Method, r.RequestURI, time.Since(t))
+		if !strings.HasPrefix(r.URL.Path, "/static/") {
+			log.Printf("%s %s %s \n", r.Method, r.RequestURI, time.Since(t))
+		}
 	})
 }
 
@@ -73,6 +81,47 @@ func (app *application) authRequired(next http.Handler) http.Handler {
 			app.sessionMgr.Put(r.Context(), "error", "请先登录")
 			http.Redirect(w, r, "/sign", http.StatusSeeOther)
 			return
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
+func (app *application) setProfile(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if userID, isLogin := app.IsLogin(r); isLogin {
+
+			fmt.Println(">>>>>>>> ", isLogin)
+			// 验证登录成功了，设置用户信息到session中
+			user, err := app.redis.GetUserCache(userID)
+			if err != nil {
+				slog.Error("middleware app.redis.GetUserCache failed", "err", err.Error(), "userid", userID)
+				if err == redisrepo.ErrNoFoundUser {
+					user, err = app.store.GetUserByID(userID)
+					if err != nil {
+						slog.Info("middleware app.store.GetUserByID(userID) faied", "err", err.Error(), "userid", userID)
+						app.sessionMgr.Put(r.Context(), "error", "获取用户信息失败")
+						http.Redirect(w, r, "/sign", http.StatusSeeOther)
+						return
+					}
+					fmt.Println(">>>> user: ", user.Name, user.Avatar)
+					app.sessionMgr.Put(r.Context(), UserInfoKey, user)
+					err = app.redis.SetUserCache(user)
+					if err != nil {
+						slog.Error("middleware app.redis.SetUserCache(user) failed", "err", err.Error())
+						// TODO: 通知管理员
+					}
+				} else {
+					fmt.Println(">>>> 获取用户信息失败: ", user.Name, user.Avatar)
+					app.sessionMgr.Put(r.Context(), "error", "获取用户信息失败")
+					http.Redirect(w, r, "/sign", http.StatusSeeOther)
+					return
+				}
+			}
+			fmt.Println(">>>>>>>> put", user.ID, user.Name, user.Avatar, err)
+
+			app.sessionMgr.Put(r.Context(), UserInfoKey, user)
+		} else {
+			fmt.Println(">>>>>>>>1 ", isLogin)
 		}
 		next.ServeHTTP(w, r)
 	})

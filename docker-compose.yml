@@ -69,5 +69,13 @@ services:
       - ./storage/redis:/data
       - ./storage/redisconf/redis.conf:/etc/redis/redis.conf
 
+  rabbitmq:
+    image: "rabbitmq:3.11.9-management-alpine"
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - ./storage/rabbitmq/:/var/lib/rabbitmq/
+
 networks:
   default:

@@ -28,7 +28,9 @@ func (app *application) setupRoute() *mux.ServeMux {
 }
 
 // showpages 页面访问
-func (app *application) showpages(r *mux.ServeMux) {
+func (app *application) showpages(router *mux.ServeMux) {
+	r := router.RouteGroup("")
+	r.Use(app.setProfile)
 	r.GET("/", app.indexHandler)
 	r.GET("/sign", app.signHandler)
 	r.GET("/forgot", app.forgotHandler)
@@ -57,6 +59,7 @@ func (app *application) userLogicHandler(r *mux.ServeMux) {
 	m.POST("/forgot", app.indexHandler)
 	m.POST("/reset", app.indexHandler)
 
+	m.GET("/logout", app.logoutHandler).Use(app.authRequired)
 	m.GET("/profile", app.getUserHandler).Use(app.authRequired)
 	m.POST("/profile", app.updateProfileHandler).Use(app.authRequired)
 }

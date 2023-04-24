@@ -46,6 +46,7 @@ func TestCreateBook(t *testing.T) {
 }
 
 // NOTE: 测试下单图书，并发问题
+// 虽然解决了，并发下单MySQL死锁问题，但是一下子的流量全部打入MySQL，很容易挂掉
 func TestOrderBook(t *testing.T) {
 	var wg sync.WaitGroup
 
@@ -54,7 +55,7 @@ func TestOrderBook(t *testing.T) {
 	fmt.Println("init >>", book.Stock)
 
 	var listUsers []models.User
-	for i := 0; i < 25; i++ {
+	for i := 0; i < 2000; i++ {
 		user := createUser(t)
 		listUsers = append(listUsers, user)
 	}
@@ -71,6 +72,7 @@ func TestOrderBook(t *testing.T) {
 			}
 		}()
 
+		// 当用户数量巨大时，一下子全部请求MySQL，很有可能导致MySQL宕机
 		go func(user models.User) {
 			defer wg.Done()
 			err := testRepo.TxUserBuyBook(user.ID, book.ID)

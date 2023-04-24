@@ -18,6 +18,7 @@
 </head>
 
 <body>
+    {{$userInfo := index .Data "userInfo"}}
     <!-- Toast 消息容器 -->
     <ul class="notifications"></ul>
     <div class="container">
@@ -38,10 +39,12 @@
                         <div class="userinfo flex items-center">
                             <div class="avatar">
                                 <a href="#">
-                                    <img src="/static/images/avatar1.png" alt="avatar">
+                                    <img src="{{with $userInfo}}{{.Avatar}}{{end}}" alt="avatar">
                                 </a>
                             </div>
-                            <a href="#">Lightsaid</a>
+                            {{with $userInfo}}
+                            <a href="#">{{.Name}}</a>
+                            {{end}}
                         </div>
                     </li>
                 </ul>
@@ -51,8 +54,7 @@
                     <li>
                         <a href="/sign" class="flex items-center">
                             <i class="iconfont icon-dengluyonghuming" style="font-size: 19px;"></i>
-                            <span class="flex items-center">&nbsp;Register<i
-                                    style="font-weight: bold; font-size: 12px;">&nbsp;/&nbsp;</i>Login</span>
+                            <span class="flex items-center">&nbsp;Register<i style="font-weight: bold; font-size: 12px;">&nbsp;/&nbsp;</i>Login</span>
                         </a>
                     </li>
                 </ul>

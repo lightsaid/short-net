@@ -47,6 +47,14 @@ window.addEventListener("load", function () {
                                 </div>
                             </form>
                         </div>
+
+                        <div class="user_menu">
+                            <ul>
+                                <li class="logout">
+                                    <a href="/logout">退出登录</a>
+                                </li>
+                            </ul>
+                        </div>
                     `
                     }
                 })
